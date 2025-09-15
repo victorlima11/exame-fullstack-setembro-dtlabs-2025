@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS devices (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL,
   location VARCHAR(255) NOT NULL,
   sn VARCHAR(12) NOT NULL UNIQUE CHECK (LENGTH(sn) = 12),

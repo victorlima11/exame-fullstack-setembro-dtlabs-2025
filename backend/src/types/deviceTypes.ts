@@ -1,4 +1,3 @@
-// types/deviceTypes.ts
 export interface NewDevice {
   name: string;
   location: string;
