@@ -27,11 +27,11 @@ export async function getDeviceController(req: Request, res: Response) {
     const device = await getDeviceById(id);
     
     if (!device) {
-      return res.status(404).json({ error: 'Dispositivo não encontrado' });
+      return res.status(404).json({ error: 'Device not found' });
     }
     
     if (device.user_id !== (req as any).user.id) {
-      return res.status(403).json({ error: 'Acesso negado' });
+      return res.status(403).json({ error: 'Access denied' });
     }
     
     res.json(device);
@@ -71,11 +71,11 @@ export async function updateDeviceController(req: Request, res: Response) {
 
     const existingDevice = await getDeviceById(id);
     if (!existingDevice) {
-      return res.status(404).json({ error: 'Dispositivo não encontrado' });
+      return res.status(404).json({ error: 'Device not found' });
     }
     
     if (existingDevice.user_id !== (req as any).user.id) {
-      return res.status(403).json({ error: 'Acesso negado' });
+      return res.status(403).json({ error: 'Access denied' });
     }
     
     const updatedDevice = await updateDevice(id, updates);
@@ -91,11 +91,11 @@ export async function deleteDeviceController(req: Request, res: Response) {
     
     const existingDevice = await getDeviceById(id);
     if (!existingDevice) {
-      return res.status(404).json({ error: 'Dispositivo não encontrado' });
+      return res.status(404).json({ error: 'Device not found' });
     }
     
     if (existingDevice.user_id !== (req as any).user.id) {
-      return res.status(403).json({ error: 'Acesso negado' });
+      return res.status(403).json({ error: 'Access denied' });
     }
     
     await deleteDevice(id);

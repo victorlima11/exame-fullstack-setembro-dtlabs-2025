@@ -1,9 +1,17 @@
-// ...existing code...
-// Removido interface duplicada Notification, usar do types/notificationTypes.ts
 import { db } from '../config/db';
 import { NotificationRule, CreateNotificationRule, Notification } from '../types/notificationTypes';
 
 export class NotificationRepository {
+  static async getUserNotifications(userId: string): Promise<Notification[]> {
+    const query = `
+      SELECT * FROM notifications 
+      WHERE user_id = $1 
+      ORDER BY created_at DESC
+    `;
+    const result = await db.query<Notification>(query, [userId]);
+    return result.rows;
+  }
+  
   static async createNotification(notification: Notification): Promise<Notification> {
     const query = `
       INSERT INTO notifications (

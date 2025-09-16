@@ -1,45 +1,40 @@
-import { db } from '../config/db';
+import { Request, Response } from 'express';
+import { NotificationService } from '../services/notificationService';
+
 export const getUserNotifications = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
-    const result = await db.query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
-    res.json(result.rows);
+    const notifications = await NotificationService.getUserNotifications(userId);
+    res.json(notifications);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-import { Request, Response } from 'express';
-import { NotificationRepository } from '../repositories/notificationRepository';
-import { CreateNotificationRule } from '../types/notificationTypes';
 
-export const createNotificationRule = async (req: Request, res: Response): Promise<void> => {
+export const createNotificationRule = async (req: Request, res: Response) => {
   try {
-    const ruleData: CreateNotificationRule = {
-      ...req.body,
-      user_id: (req as any).user.id
-    };
-
-    const rule = await NotificationRepository.createRule(ruleData);
+    const userId = (req as any).user.id;
+    const rule = await NotificationService.createRule(userId, req.body);
     res.status(201).json(rule);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-export const getUserNotificationRules = async (req: Request, res: Response): Promise<void> => {
+export const getUserNotificationRules = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
-    const rules = await NotificationRepository.findByUser(userId);
+    const rules = await NotificationService.getUserNotifications(userId);
     res.json(rules);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-export const deleteNotificationRule = async (req: Request, res: Response): Promise<void> => {
+export const deleteNotificationRule = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await NotificationRepository.deleteRule(id);
+    await NotificationService.deleteRule(id);
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

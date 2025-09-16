@@ -1,21 +1,18 @@
 import { DeviceRepository } from '../repositories/deviceRepository';
 import { NewDevice, DeviceFilters } from '../types/deviceTypes';
+import { DeviceSNInvalid, DeviceSNAlreadyExists } from '../middlewares/errorMiddleware';
 
 export async function createDevice(device: NewDevice) {
-  try {
-    if (!/^\d{12}$/.test(device.sn)) {
-      throw new Error('Serial Number deve ter exatamente 12 dígitos');
-    }
-
-    const existingDevice = await DeviceRepository.findDeviceBySN(device.sn);
-    if (existingDevice) {
-      throw new Error('Já existe um dispositivo com este Serial Number');
-    }
-
-    return await DeviceRepository.createDevice(device);
-  } catch (error) {
-    throw error;
+  if (!/^\d{12}$/.test(device.sn)) {
+    throw new DeviceSNInvalid();
   }
+
+  const existingDevice = await DeviceRepository.findDeviceBySN(device.sn);
+  if (existingDevice) {
+    throw new DeviceSNAlreadyExists();
+  }
+
+  return await DeviceRepository.createDevice(device);
 }
 
 export async function getDeviceById(id: string) {
@@ -37,12 +34,12 @@ export async function getAllDevices(filters?: DeviceFilters) {
 export async function updateDevice(id: string, device: Partial<NewDevice>) {
   if (device.sn) {
     if (!/^\d{12}$/.test(device.sn)) {
-      throw new Error('Serial Number deve ter exatamente 12 dígitos');
+      throw new DeviceSNInvalid();
     }
 
     const existingDevice = await DeviceRepository.findDeviceBySN(device.sn);
     if (existingDevice && existingDevice.id !== id) {
-      throw new Error('Já existe outro dispositivo com este Serial Number');
+      throw new DeviceSNAlreadyExists();
     }
   }
 

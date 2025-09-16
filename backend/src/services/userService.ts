@@ -2,25 +2,21 @@ import { hash } from 'crypto';
 import { UserRepository } from '../repositories/userRepository';
 import { NewUser } from '../types/userTypes';
 import { hashPassword } from '../utils/hash';
+import { UserAlreadyExists } from '../middlewares/errorMiddleware';
 
 export async function createUser(user: NewUser) {
-    try {
-        const exists = await UserRepository.findUserByEmail(user.email);
-        if (exists) {
-            throw new Error('Usuário já cadastrado com este e-mail');
-        }
-
-        const hashedPassword = await hashPassword(user.password);
-
-        return await UserRepository.createUser({
-            ...user,
-            password: hashedPassword,
-        });
-    } catch (error) {
-        throw error;
+    const exists = await UserRepository.findUserByEmail(user.email);
+    if (exists) {
+        throw new UserAlreadyExists();
     }
-}
 
+    const hashedPassword = await hashPassword(user.password);
+
+    return await UserRepository.createUser({
+        ...user,
+        password: hashedPassword,
+    });
+}
 
 export async function getAllUsers() {
     return UserRepository.findAllUsers();
