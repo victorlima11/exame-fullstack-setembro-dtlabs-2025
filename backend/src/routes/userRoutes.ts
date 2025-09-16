@@ -3,8 +3,8 @@ import { login, register, getAllUsers, getUserById, updateUser, deleteUser } fro
 import { validateUserLogin, validateUserRegister } from "../middlewares/userMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { Router } from "express";
-const router: Router = express.Router();
 
+const router: Router = express.Router();
 
 router.post("/login", validateUserLogin, login);
 router.post("/register", validateUserRegister, register);

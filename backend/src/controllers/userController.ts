@@ -67,7 +67,7 @@ export async function updateUser(req: Request, res: Response) {
         const { password, ...safeUser } = updatedUser;
         return res.json(safeUser);
     } catch (error: any) {
-        return res.status(400).json({ error: error?.message || 'Erro ao atualizar usuário.' });
+        return res.status(400).json({ error: 'Erro ao atualizar usuário.' });
     }
 }
 
@@ -77,6 +77,6 @@ export async function deleteUser(req: Request, res: Response) {
         await deleteUserByIdService(id);
         return res.status(204).send();
     } catch (error: any) {
-        return res.status(400).json({ error: error?.message || 'Erro ao deletar usuário.' });
+        return res.status(400).json({ error: 'Erro ao deletar usuário.' });
     }
 }
