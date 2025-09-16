@@ -11,20 +11,29 @@ import { generateToken } from '../utils/token';
 import { Request, Response } from 'express';
 
 export async function login(req: Request, res: Response) {
+  try {
     const { email, password } = req.body;
     const user = await getUserByEmail(email);
 
     if (!user) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const validPassword = await comparePassword(password, user.password);
     if (!validPassword) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const token = generateToken({ id: user.id, email: user.email });
-    return res.json({ user, token });
+    return res.json({
+      id: user.id,
+      name: user.name,
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
 
 export async function register(req: Request, res: Response) {
@@ -90,5 +99,17 @@ export async function deleteUser(req: Request, res: Response) {
         return res.status(204).send();
     } catch (error: any) {
         return res.status(400).json({ error: 'Error deleting user.' });
+    }
+}
+
+export async function getMe(req: Request, res: Response) {
+    try {
+    const userId = (req as any).user.id; // Corrige tipagem
+        const user = await getUserByIdService(userId);
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+        const { password, ...safeUser } = user;
+        return res.json(safeUser);
+    } catch (error: any) {
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }

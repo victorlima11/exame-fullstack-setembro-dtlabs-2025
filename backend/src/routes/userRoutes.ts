@@ -1,13 +1,16 @@
 import express from "express";
-import { login, register, getAllUsers, getUserById, updateUser, deleteUser } from "../controllers/userController";
+import { login, register, getAllUsers, getUserById, updateUser, deleteUser, getMe } from "../controllers/userController";
 import { validateUserLogin, validateUserRegister } from "../middlewares/userMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { Router } from "express";
 
 const router: Router = express.Router();
 
+
 router.post("/login", validateUserLogin, login);
 router.post("/register", validateUserRegister, register);
+
+router.get("/me", authMiddleware, getMe);
 
 router.get("/", authMiddleware, getAllUsers);
 router.get("/:id", authMiddleware, getUserById);

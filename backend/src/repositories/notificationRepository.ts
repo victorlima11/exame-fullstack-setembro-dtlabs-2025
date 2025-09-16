@@ -2,6 +2,19 @@ import { db } from '../config/db';
 import { NotificationRule, CreateNotificationRule, Notification } from '../types/notificationTypes';
 
 export class NotificationRepository {
+  static async updateRule(ruleId: string, updates: Partial<CreateNotificationRule>): Promise<NotificationRule | null> {
+    // Só permite atualizar device_sn e condition
+    const query = `
+      UPDATE notification_rules
+      SET device_sn = COALESCE($2, device_sn),
+          condition = COALESCE($3, condition)
+      WHERE id = $1
+      RETURNING *;
+    `;
+    const values = [ruleId, updates.device_sn, updates.condition];
+    const result = await db.query<NotificationRule>(query, values);
+    return result.rows[0] || null;
+  }
   static async getUserNotifications(userId: string): Promise<Notification[]> {
     const query = `
       SELECT * FROM notifications 

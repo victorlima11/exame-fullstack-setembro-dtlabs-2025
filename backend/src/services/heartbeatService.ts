@@ -11,3 +11,7 @@ export const processHeartbeat = async (heartbeat: Heartbeat): Promise<void> => {
 export const getHeartbeats = async (filter: HeartbeatFilter): Promise<Heartbeat[]> => {
   return HeartbeatRepository.findByDevice(filter);
 };
+
+export const getLatestHeartbeat = async (device_sn: string): Promise<Heartbeat | null> => {
+  return HeartbeatRepository.findLatestByDevice(device_sn);
+};

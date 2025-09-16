@@ -4,6 +4,12 @@ import { NotificationRepository } from '../repositories/notificationRepository';
 import { getIO } from '../utils/socketIO';
 
 export class NotificationService {
+  static async getUserRules(userId: string) {
+    return await NotificationRepository.findByUser(userId);
+  }
+  static async updateRule(ruleId: string, updates: any) {
+    return await NotificationRepository.updateRule(ruleId, updates);
+  }
   static async getUserNotifications(userId: string) {
     return await NotificationRepository.getUserNotifications(userId);
   }

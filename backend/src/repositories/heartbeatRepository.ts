@@ -2,6 +2,16 @@ import { db } from '../config/db';
 import { Heartbeat, HeartbeatFilter } from '../types/heartbeatTypes';
 
 export class HeartbeatRepository {
+  static async findLatestByDevice(device_sn: string): Promise<Heartbeat | null> {
+    const query = `
+      SELECT * FROM heartbeats 
+      WHERE device_sn = $1 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `;
+    const result = await db.query(query, [device_sn]);
+    return result.rows[0] || null;
+  }
   static async create(heartbeat: Heartbeat): Promise<void> {
     const query = `
       INSERT INTO heartbeats (
