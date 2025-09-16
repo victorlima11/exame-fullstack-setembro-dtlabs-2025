@@ -8,8 +8,11 @@ services:
       - .:/app
     depends_on:
       - db
+      - redis
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/dt_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     command: npm run dev
 
   db:
@@ -25,5 +28,14 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
 volumes:
   pgdata:
+  redisdata:
