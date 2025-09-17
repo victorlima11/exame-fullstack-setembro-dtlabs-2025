@@ -23,7 +23,6 @@ interface Notification {
   read: boolean;
 }
 
-// Decodifica o JWT para pegar o userId
 function getUserIdFromToken(token: string | null): string | null {
   if (!token) return null;
   try {
@@ -69,11 +68,11 @@ export function Notifications() {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
 
-    if (diff < 60000) return 'Agora mesmo';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}min atrás`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h atrás`;
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}min ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     
-    return date.toLocaleDateString('pt-BR', { 
+    return date.toLocaleDateString('en-US', { 
       day: '2-digit', 
       month: '2-digit',
       hour: '2-digit',
@@ -93,31 +92,26 @@ export function Notifications() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // Conecta ao websocket e escuta notificações
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken(token);
     if (!userId) return;
 
-    // Conecta ao backend
     const socket = io('http://localhost:3000', {
       transports: ['websocket'],
       auth: { token },
     });
     socketRef.current = socket;
 
-    // Entra na sala do usuário
     socket.emit('join-user-room', userId);
 
-    // Recebe notificações em tempo real
     socket.on('notification', (data: any) => {
-      // Adapta o formato recebido para o Notification do front
       const notif: Notification = {
         id: Date.now().toString() + Math.random().toString(16).slice(2),
-        type: 'warning', // ou 'error', 'info', 'success' conforme data.metric ou data.message
-        title: data.metric ? `${data.metric} alerta` : 'Alerta',
-        message: data.message || 'Nova notificação',
-        deviceName: data.device_sn || 'Dispositivo',
+        type: 'warning',
+        title: data.metric ? `${data.metric} alert` : 'Alert',
+        message: data.message || 'New notification',
+        deviceName: data.device_sn || 'Device',
         timestamp: data.timestamp ? new Date(data.timestamp).toISOString() : new Date().toISOString(),
         read: false,
       };
@@ -131,12 +125,11 @@ export function Notifications() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <BellRing className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-foreground">
-            Notificações Recentes
+            Recent Notifications
           </span>
           {unreadCount > 0 && (
             <Badge className="bg-primary text-primary-foreground">
@@ -152,16 +145,15 @@ export function Notifications() {
             onClick={() => setNotifications([])}
             className="text-xs hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
           >
-            Limpar tudo
+            Clear all
           </Button>
         )}
       </div>
 
-      {/* Notifications List */}
       {notifications.length === 0 ? (
         <div className="text-center py-8">
           <Bell className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
-          <p className="text-muted-foreground text-sm">Nenhuma notificação no momento</p>
+          <p className="text-muted-foreground text-sm">No notifications at the moment</p>
         </div>
       ) : (
         <ScrollArea className="h-[400px]">
@@ -190,9 +182,9 @@ export function Notifications() {
                             {notification.title}
                           </h4>
                           <Badge className={`text-xs ${badgeInfo.class}`}>
-                            {notification.type === 'warning' && 'Atenção'}
-                            {notification.type === 'error' && 'Erro'}
-                            {notification.type === 'success' && 'Sucesso'}
+                            {notification.type === 'warning' && 'Warning'}
+                            {notification.type === 'error' && 'Error'}
+                            {notification.type === 'success' && 'Success'}
                             {notification.type === 'info' && 'Info'}
                           </Badge>
                         </div>

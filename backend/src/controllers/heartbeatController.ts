@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { addHeartbeatToQueue } from '../queues/heartbeatQueue';
 import { getHeartbeats } from '../services/heartbeatService';
 import { getLatestHeartbeat } from '../services/heartbeatService';
+import { HeartbeatFilter } from '../types/heartbeatTypes';
+
 export const getLatestDeviceHeartbeat = async (req: Request, res: Response): Promise<void> => {
   try {
     const { device_sn } = req.params;
@@ -16,7 +18,6 @@ export const getLatestDeviceHeartbeat = async (req: Request, res: Response): Pro
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-import { HeartbeatFilter } from '../types/heartbeatTypes';
 
 export const createHeartbeat = async (req: Request, res: Response): Promise<void> => {
   try {

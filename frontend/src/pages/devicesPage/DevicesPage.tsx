@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +14,9 @@ import {
   Search,
   Filter,
   X,
-  Save,
-  ArrowLeft
+  Save
 } from "lucide-react";
-import { Header } from "../global/Header";
+import { Header } from "../../components/header/Header";
 
 interface Device {
   id: string;
@@ -30,6 +30,7 @@ interface Device {
 
 export default function DevicesPage() {
   const { user } = useAuth();
+  const { authFetch, loading: fetchLoading, error: fetchError } = useAuthFetch();
   const [devices, setDevices] = useState<Device[]>([]);
   const [filteredDevices, setFilteredDevices] = useState<Device[]>([]);
   const [showDeviceForm, setShowDeviceForm] = useState(false);
@@ -57,62 +58,46 @@ export default function DevicesPage() {
     setLoading(true);
     setRefreshing(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/devices/user', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const devicesWithStatus = await Promise.all(
-          data.map(async (device: any) => {
-            let status: Device['status'] = 'offline';
-            let lastSeen = device.updatedAt || new Date().toISOString();
-            try {
-              const hbRes = await fetch(`http://localhost:3000/api/v1/heartbeats/${device.sn}/latest`, {
-                headers: { 
-                  'Authorization': `Bearer ${token}`,
-                  'Cache-Control': 'no-cache' 
+      const data = await authFetch('http://localhost:3000/api/v1/devices/user');
+      const devicesWithStatus = await Promise.all(
+        data.map(async (device: any) => {
+          let status: Device['status'] = 'offline';
+          let lastSeen = device.updatedAt || new Date().toISOString();
+          try {
+            const lastHb = await authFetch(`http://localhost:3000/api/v1/heartbeats/${device.sn}/latest`, {
+              cache: 'no-cache'
+            });
+            
+            if (lastHb) {
+              lastSeen = lastHb.createdAt || lastHb.timestamp || lastSeen;
+              const diff = Date.now() - new Date(lastSeen).getTime();
+              if (diff < 5 * 60 * 1000 && lastHb.connectivity === 1) {
+                if (lastHb.cpu_usage > 80 || lastHb.temperature > 60) {
+                  status = 'warning';
+                } else {
+                  status = 'online';
                 }
-              });
-              if (hbRes.ok) {
-                const lastHb = await hbRes.json();
-                if (lastHb) {
-                  lastSeen = lastHb.createdAt || lastHb.timestamp || lastSeen;
-                  const diff = Date.now() - new Date(lastSeen).getTime();
-                  if (diff < 5 * 60 * 1000 && lastHb.connectivity === 1) {
-                    if (lastHb.cpu_usage > 80 || lastHb.temperature > 60) {
-                      status = 'warning';
-                    } else {
-                      status = 'online';
-                    }
-                  } else {
-                    status = 'offline';
-                  }
-                }
+              } else {
+                status = 'offline';
               }
-            } catch (error) {
-              console.error(`Erro ao buscar último heartbeat para ${device.sn}:`, error);
             }
-            return {
-              id: device.id,
-              name: device.name,
-              location: device.location,
-              sn: device.sn,
-              description: device.description,
-              status,
-              lastSeen,
-            };
-          })
-        );
-        setDevices(devicesWithStatus);
-      }
+          } catch (error) {
+            console.error(`Error fetching latest heartbeat for ${device.sn}:`, error);
+          }
+          return {
+            id: device.id,
+            name: device.name,
+            location: device.location,
+            sn: device.sn,
+            description: device.description,
+            status,
+            lastSeen,
+          };
+        })
+      );
+      setDevices(devicesWithStatus);
     } catch (err) {
-      console.error('Erro ao buscar dispositivos:', err);
+      console.error('Error fetching devices:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -121,8 +106,6 @@ export default function DevicesPage() {
 
   const filterDevices = () => {
     let result = devices;
-
-    // Aplicar filtro de busca
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(device => 
@@ -132,86 +115,50 @@ export default function DevicesPage() {
         (device.description && device.description.toLowerCase().includes(term))
       );
     }
-
-    // Aplicar filtro de status
     if (statusFilter !== "all") {
       result = result.filter(device => device.status === statusFilter);
     }
-
     setFilteredDevices(result);
   };
 
   const handleCreateDevice = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/devices', {
+      await authFetch('http://localhost:3000/api/v1/devices', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData)
       });
-
-      if (response.ok) {
-        setShowDeviceForm(false);
-        setFormData({ name: "", location: "", sn: "", description: "" });
-        fetchUserDevices();
-      } else {
-        console.error('Erro ao criar dispositivo');
-      }
+      setShowDeviceForm(false);
+      setFormData({ name: "", location: "", sn: "", description: "" });
+      fetchUserDevices();
     } catch (error) {
-      console.error('Erro ao criar dispositivo:', error);
+      console.error('Error creating device:', error);
     }
   };
 
   const handleUpdateDevice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDevice) return;
-
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/v1/devices/${editingDevice.id}`, {
+      await authFetch(`http://localhost:3000/api/v1/devices/${editingDevice.id}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData)
       });
-
-      if (response.ok) {
-        setEditingDevice(null);
-        setFormData({ name: "", location: "", sn: "", description: "" });
-        fetchUserDevices();
-      } else {
-        console.error('Erro ao atualizar dispositivo');
-      }
+      setEditingDevice(null);
+      setFormData({ name: "", location: "", sn: "", description: "" });
+      fetchUserDevices();
     } catch (error) {
-      console.error('Erro ao atualizar dispositivo:', error);
+      console.error('Error updating device:', error);
     }
   };
 
   const handleDeleteDevice = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este dispositivo?')) return;
-
+    if (!window.confirm('Are you sure you want to delete this device?')) return;
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/v1/devices/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        fetchUserDevices();
-      } else {
-        console.error('Erro ao excluir dispositivo');
-      }
+      await authFetch(`http://localhost:3000/api/v1/devices/${id}`, { method: 'DELETE' });
+      fetchUserDevices();
     } catch (error) {
-      console.error('Erro ao excluir dispositivo:', error);
+      console.error('Error deleting device:', error);
     }
   };
 
@@ -242,7 +189,6 @@ export default function DevicesPage() {
       offline: { color: "bg-gray-100 text-gray-800", text: "Offline" },
       warning: { color: "bg-yellow-100 text-yellow-800", text: "Warning" }
     };
-
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusConfig[status].color}`}>
         {statusConfig[status].text}
@@ -252,57 +198,51 @@ export default function DevicesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header currentPage="Dispositivos" />
-      
+      <Header currentPage="Devices" />
       <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Cabeçalho */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Gerenciar Dispositivos
+              Manage Devices
             </h2>
             <p className="text-muted-foreground">
-              Adicione, edite ou remova dispositivos do sistema
+              Add, edit, or remove devices from the system
             </p>
           </div>
-          
           <Button 
             onClick={() => setShowDeviceForm(true)}
             className="bg-gradient-primary hover:bg-primary/90 text-primary-foreground shadow-primary"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Novo Dispositivo
+            New Device
           </Button>
         </div>
 
-        {/* Filtros e Busca */}
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar dispositivos..."
+                  placeholder="Search devices..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
-              
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <select 
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border rounded-md px-3 py-2 text-sm"
+                  className="border rounded-md px-3 py-2 text-sm text-black"
                 >
-                  <option value="all">Todos os status</option>
+                  <option value="all">All Statuses</option>
                   <option value="online">Online</option>
                   <option value="offline">Offline</option>
                   <option value="warning">Warning</option>
                 </select>
               </div>
-              
               <Button 
                 onClick={fetchUserDevices} 
                 variant="outline" 
@@ -310,46 +250,44 @@ export default function DevicesPage() {
                 className="whitespace-nowrap"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                Atualizar
+                Refresh
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Lista de Dispositivos */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Activity className="h-5 w-5 mr-2 text-primary" />
-              Seus Dispositivos
+              Your Devices
               {loading && <RefreshCw className="h-4 w-4 animate-spin ml-2" />}
             </CardTitle>
             <CardDescription>
-              {filteredDevices.length} de {devices.length} dispositivo(s) encontrado(s)
+              {filteredDevices.length} of {devices.length} device(s) found
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-                <p className="mt-2 text-muted-foreground">Carregando dispositivos...</p>
+                <p className="mt-2 text-muted-foreground">Loading devices...</p>
               </div>
             ) : filteredDevices.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">
-                  {devices.length === 0 ? 'Você ainda não possui dispositivos.' : 'Nenhum dispositivo encontrado com os filtros aplicados.'}
+                  {devices.length === 0 ? 'You do not have any devices yet.' : 'No devices found with applied filters.'}
                 </p>
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-muted/50 font-medium">
-                  <div className="md:col-span-4">Nome</div>
+                  <div className="md:col-span-4">Name</div>
                   <div className="md:col-span-2">Serial</div>
-                  <div className="md:col-span-3">Localização</div>
+                  <div className="md:col-span-3">Location</div>
                   <div className="md:col-span-2">Status</div>
-                  <div className="md:col-span-1">Ações</div>
+                  <div className="md:col-span-1">Actions</div>
                 </div>
-                
                 <div className="divide-y">
                   {filteredDevices.map(device => (
                     <div key={device.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 hover:bg-muted/30">
@@ -396,14 +334,13 @@ export default function DevicesPage() {
         </Card>
       </div>
 
-      {/* Modal de formulário */}
       {(showDeviceForm || editingDevice) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-background rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">
-                  {editingDevice ? 'Editar Dispositivo' : 'Novo Dispositivo'}
+                  {editingDevice ? 'Edit Device' : 'New Device'}
                 </h3>
                 <Button variant="ghost" size="icon" onClick={resetForm}>
                   <X className="h-4 w-4" />
@@ -412,58 +349,31 @@ export default function DevicesPage() {
               
               <form onSubmit={editingDevice ? handleUpdateDevice : handleCreateDevice} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome do Dispositivo</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleFormChange}
-                    required
-                  />
+                  <Label htmlFor="name">Device Name</Label>
+                  <Input id="name" name="name" value={formData.name} onChange={handleFormChange} required />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="sn">Número de Série</Label>
-                  <Input
-                    id="sn"
-                    name="sn"
-                    value={formData.sn}
-                    onChange={handleFormChange}
-                    required
-                  />
+                  <Label htmlFor="sn">Serial Number</Label>
+                  <Input id="sn" name="sn" value={formData.sn} onChange={handleFormChange} required />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="location">Localização</Label>
-                  <Input
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleFormChange}
-                    required
-                  />
+                  <Label htmlFor="location">Location</Label>
+                  <Input id="location" name="location" value={formData.location} onChange={handleFormChange} required />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="description">Descrição (Opcional)</Label>
+                  <Label htmlFor="description">Description (Optional)</Label>
                   <textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleFormChange}
                     rows={3}
-                    className="w-full border rounded-md px-3 py-2 text-sm"
+                    className="w-full border rounded-md px-3 py-2 text-sm bg-transparent"
                   />
                 </div>
-                
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={resetForm}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">
-                    <Save className="h-4 w-4 mr-2" />
-                    {editingDevice ? 'Atualizar' : 'Criar'}
-                  </Button>
+                  <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
+                  <Button type="submit"><Save className="h-4 w-4 mr-2" />{editingDevice ? 'Update' : 'Create'}</Button>
                 </div>
               </form>
             </div>

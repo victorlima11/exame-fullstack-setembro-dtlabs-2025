@@ -27,13 +27,13 @@ export default function Register() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem");
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres");
+      setError("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
@@ -41,7 +41,7 @@ export default function Register() {
     const result = await register(name, email, password);
     
     if (!result.success) {
-      setError(result.error || "Erro desconhecido");
+      setError(result.error || "Error at registration");
     }
     
     setLoading(false);
@@ -58,15 +58,15 @@ export default function Register() {
             DeviceWatch
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Crie sua conta para começar a monitorar dispositivos
+            Fill in the details below to create your account
           </p>
         </div>
 
         <Card className="border border-border/50 bg-gradient-card shadow-card">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Cadastrar</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Sign up</CardTitle>
             <CardDescription className="text-center">
-              Preencha os dados abaixo para criar sua conta
+              Create your account to start monitoring your devices
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -78,13 +78,13 @@ export default function Register() {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="name">Nome completo</Label>
+                <Label htmlFor="name">Name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Seu nome"
+                    placeholder="your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="pl-10"
@@ -100,7 +100,7 @@ export default function Register() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="seu@email.com"
+                    placeholder="youremail@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -110,7 +110,7 @@ export default function Register() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -126,7 +126,7 @@ export default function Register() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -149,22 +149,22 @@ export default function Register() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando conta...
+                      Creating account...
                   </>
                 ) : (
-                  "Criar conta"
+                  "Sign Up"
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Já tem uma conta?{" "}
+                Already have an account?{" "}
                 <Link 
                   to="/login" 
                   className="font-medium text-primary hover:text-primary-glow transition-colors"
                 >
-                  Entre aqui
+                  Log in
                 </Link>
               </p>
             </div>

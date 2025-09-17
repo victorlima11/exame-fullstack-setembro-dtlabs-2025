@@ -7,8 +7,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
-import Dashboard from "./components/dashboard/Dashboard";
-import DevicesPage from "./components/devices/DevicesPage";
+import DashboardPage from "./pages/dashboardPage/DashboardPage";
+import DevicesPage from "./pages/devicesPage/DevicesPage";
+import NotificationsPage from "./pages/notificationsPage/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -44,7 +45,7 @@ const App = () => (
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <DashboardPage />
                 </ProtectedRoute>
               } 
             />
@@ -54,6 +55,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DevicesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
                 </ProtectedRoute>
               }
             />

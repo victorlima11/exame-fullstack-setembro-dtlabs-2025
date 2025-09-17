@@ -59,7 +59,7 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
       case 'offline':
         return { variant: 'secondary' as const, text: 'Offline', class: 'bg-gray-500 text-white' };
       case 'warning':
-        return { variant: 'secondary' as const, text: 'Atenção', class: 'bg-yellow-500 text-white' };
+        return { variant: 'secondary' as const, text: 'Warning', class: 'bg-yellow-500 text-white' };
       default:
         return { variant: 'secondary' as const, text: 'Offline', class: 'bg-gray-500 text-white' };
     }
@@ -70,17 +70,17 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
       const date = new Date(dateString);
       const now = new Date();
       const diff = now.getTime() - date.getTime();
-      if (diff < 60000) return 'Agora mesmo';
-      if (diff < 3600000) return `${Math.floor(diff / 60000)}min atrás`;
-      if (diff < 86400000) return `${Math.floor(diff / 3600000)}h atrás`;
+      if (diff < 60000) return 'Right now';
+      if (diff < 3600000) return `${Math.floor(diff / 60000)}min ago`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
       return date.toLocaleDateString('pt-BR');
     } catch (error) {
-      return 'Data inválida';
+      return 'Invalid date';
     }
   };
 
   const handleDelete = async (deviceId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este dispositivo?')) return;
+    if (!confirm('Are you sure you want to delete this device?')) return;
     setDeletingId(deviceId);
     try {
       const token = localStorage.getItem('token');
@@ -93,10 +93,10 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
       if (response.ok) {
         onUpdate();
       } else {
-        alert('Erro ao excluir dispositivo');
+        alert('Error at deleting device');
       }
     } catch (err) {
-      alert('Erro de conexão ao excluir dispositivo');
+      alert('Network error at deleting device');
     }
     setDeletingId(null);
   };
@@ -123,10 +123,10 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
         setEditingDevice(null);
         onUpdate();
       } else {
-        alert('Erro ao editar dispositivo');
+        alert('Error at editing device');
       }
     } catch (err) {
-      alert('Erro de conexão ao editar dispositivo');
+      alert('Network error at editing device');
     }
     setEditLoading(false);
   };
@@ -160,13 +160,13 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
     return (
       <div className="text-center py-12">
         <Monitor className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">Nenhum dispositivo encontrado</h3>
+        <h3 className="text-lg font-medium mb-2">No devices found</h3>
         <p className="text-muted-foreground mb-4">
-          Adicione seu primeiro dispositivo para começar o monitoramento
+          Add your first device to start monitoring
         </p>
         <Button onClick={handleRefresh} disabled={refreshing}>
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          Recarregar
+          Refresh
         </Button>
       </div>
     );
@@ -177,7 +177,7 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
       <div className="flex justify-end">
         <Button onClick={handleRefresh} variant="outline" size="sm" disabled={refreshing}>
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          Atualizar
+          Refresh
         </Button>
       </div>
       {devices.map((device) => {
@@ -234,24 +234,23 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
           </div>
         );
       })}
-      {/* Modal de edição de dispositivo */}
       {editingDevice && (
         <Dialog open={true} onOpenChange={() => setEditingDevice(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Editar Dispositivo</DialogTitle>
+              <DialogTitle>Edit Device</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="editName">Nome</Label>
+                <Label htmlFor="editName">Name</Label>
                 <Input id="editName" value={editName} onChange={e => setEditName(e.target.value)} required />
               </div>
               <div>
-                <Label htmlFor="editLocation">Localização</Label>
+                <Label htmlFor="editLocation">Location</Label>
                 <Input id="editLocation" value={editLocation} onChange={e => setEditLocation(e.target.value)} required />
               </div>
               <div>
-                <Label htmlFor="editDescription">Descrição</Label>
+                <Label htmlFor="editDescription">Description</Label>
                 <Input id="editDescription" value={editDescription} onChange={e => setEditDescription(e.target.value)} />
               </div>
               <div className="flex space-x-2">

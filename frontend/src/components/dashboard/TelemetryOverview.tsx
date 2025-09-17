@@ -78,35 +78,35 @@ export function TelemetryOverview({ data, loading }: TelemetryOverviewProps) {
 
   const metrics = [
     {
-      title: "CPU Médio",
+      title: "Average CPU",
       value: `${data.avgCpu.toFixed(1)}%`,
       icon: Cpu,
       color: getStatusColor(data.avgCpu, 'cpu'),
       badge: getStatusBadge(data.avgCpu, 'cpu'),
     },
     {
-      title: "Memória Média",
+      title: "Average Memory",
       value: `${data.avgMemory.toFixed(1)}%`,
       icon: HardDrive,
       color: getStatusColor(data.avgMemory, 'memory'),
       badge: getStatusBadge(data.avgMemory, 'memory'),
     },
     {
-      title: "Temperatura",
+      title: "Temperature",
       value: `${data.avgTemperature.toFixed(1)}°C`,
       icon: Thermometer,
       color: getStatusColor(data.avgTemperature, 'temperature'),
       badge: getStatusBadge(data.avgTemperature, 'temperature'),
     },
     {
-      title: "Total Dispositivos",
+      title: "Total Devices",
       value: data.totalDevices.toString(),
       icon: Monitor,
       color: "text-primary",
       badge: "default" as const,
     },
     {
-      title: "Dispositivos Online",
+      title: "Online Devices",
       value: `${data.onlineDevices}/${data.totalDevices}`,
       icon: Wifi,
       color: data.onlineDevices === data.totalDevices ? "text-success" : 

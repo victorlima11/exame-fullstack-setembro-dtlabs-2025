@@ -28,11 +28,10 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
     e.preventDefault();
     setLoading(true);
 
-    // Validation
     if (!name.trim() || !location.trim() || !sn.trim()) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        title: "Required fields",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       setLoading(false);
@@ -41,8 +40,8 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
 
     if (!validateSerialNumber(sn)) {
       toast({
-        title: "Número de série inválido",
-        description: "O número de série deve conter exatamente 12 dígitos.",
+        title: "Invalid Serial Number",
+        description: "The serial number must be exactly 12 digits.",
         variant: "destructive",
       });
       setLoading(false);
@@ -70,23 +69,23 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
 
       if (response.ok) {
         toast({
-          title: "Dispositivo adicionado!",
-          description: `${name} foi adicionado com sucesso ao sistema.`,
+          title: "Device Added",
+          description: `${name} has been added successfully.`,
         });
         onDeviceAdded();
       } else {
         const error = await response.json();
-        console.log('Erro ao adicionar dispositivo:', error);
+        console.log('Error adding device:', error);
         toast({
-          title: "Erro ao adicionar dispositivo",
-          description: error.message || "Tente novamente mais tarde.",
+          title: "Error Adding Device",
+          description: error.message || "An error occurred while adding the device.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Erro de conexão",
-        description: "Não foi possível conectar ao servidor.",
+        title: "Network Error",
+        description: "Unable to reach the server. Please try again later.",
         variant: "destructive",
       });
     }
@@ -102,19 +101,18 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <Monitor className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span>Adicionar Novo Dispositivo</span>
+            <span>Add New Device</span>
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome do Dispositivo *</Label>
+              <Label htmlFor="name">Device Name *</Label>
               <div className="relative">
                 <Monitor className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="name"
-                  placeholder="Ex: Servidor Principal"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="pl-10"
@@ -124,12 +122,11 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Localização *</Label>
+              <Label htmlFor="location">Location *</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="location"
-                  placeholder="Ex: Datacenter A"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="pl-10"
@@ -140,12 +137,12 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sn">Número de Série *</Label>
+            <Label htmlFor="sn">Serial Number *</Label>
             <div className="relative">
               <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="sn"
-                placeholder="Digite 12 dígitos (Ex: 123456789012)"
+                placeholder="SN (12 digits)"
                 value={sn}
                 onChange={(e) => setSn(e.target.value.replace(/\D/g, '').slice(0, 12))}
                 className="pl-10"
@@ -155,18 +152,17 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
             </div>
             {sn && !validateSerialNumber(sn) && (
               <p className="text-sm text-destructive">
-                O número de série deve conter exatamente 12 dígitos
+                Serial number must be exactly 12 digits.
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição (Opcional)</Label>
+            <Label htmlFor="description">Description</Label>
             <div className="relative">
               <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
                 id="description"
-                placeholder="Descrição adicional do dispositivo..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="pl-10 min-h-[80px]"
@@ -183,7 +179,7 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
               className="flex-1"
               disabled={loading}
             >
-              Cancelar
+              Cancel
             </Button>
             <Button
               type="submit"
@@ -193,10 +189,10 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adicionando...
+                  Adding...
                 </>
               ) : (
-                "Adicionar Dispositivo"
+                "Add Device"
               )}
             </Button>
           </div>

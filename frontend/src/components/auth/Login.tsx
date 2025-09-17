@@ -27,7 +27,7 @@ export default function Login() {
     const result = await login(email, password);
     
     if (!result.success) {
-      setError(result.error || "Erro desconhecido");
+      setError(result.error || "Error at login");
     }
     
     setLoading(false);
@@ -44,15 +44,15 @@ export default function Login() {
             DeviceWatch
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Entre na sua conta para monitorar seus dispositivos
+            Login to your account
           </p>
         </div>
 
         <Card className="border border-border/50 bg-gradient-card shadow-card">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
             <CardDescription className="text-center">
-              Entre com suas credenciais para acessar o sistema
+              Use your email and password to access your account
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -70,7 +70,6 @@ export default function Login() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -80,13 +79,12 @@ export default function Login() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
@@ -103,22 +101,22 @@ export default function Login() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Entrando...
+                      Logging in...
                   </>
                 ) : (
-                  "Entrar"
+                  "Log In"
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Não tem uma conta?{" "}
+                Don't have an account?{" "}
                 <Link 
                   to="/register" 
                   className="font-medium text-primary hover:text-primary-glow transition-colors"
                 >
-                  Cadastre-se
+                  Sign up
                 </Link>
               </p>
             </div>

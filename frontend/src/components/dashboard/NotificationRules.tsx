@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { 
   Plus, 
   Trash2, 
@@ -16,8 +17,10 @@ import {
   RefreshCw,
   Edit,
   Save,
-  X
+  X,
+  Bell
 } from "lucide-react";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 interface NotificationRule {
   id: string;
@@ -43,12 +46,18 @@ interface NotificationRulesProps {
   onRuleAdded: () => void;
   onRuleDeleted: () => void;
   onRuleUpdated: () => void;
+  maxRulesToShow?: number;
 }
 
-export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleUpdated }: NotificationRulesProps) {
+export function NotificationRules({ 
+  devices, 
+  onRuleAdded, 
+  onRuleDeleted, 
+  onRuleUpdated, 
+  maxRulesToShow = 2
+}: NotificationRulesProps) {
   const [rules, setRules] = useState<NotificationRule[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -65,88 +74,57 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
   } | null>(null);
 
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { authFetch, loading, error, clearError } = useAuthFetch();
   const API_BASE_URL = 'http://localhost:3000/api/v1';
 
   const metrics = [
-    { value: 'cpu_usage', label: 'Uso de CPU (%)', icon: Cpu },
-    { value: 'ram_usage', label: 'Uso de Memória (%)', icon: HardDrive },
-    { value: 'temperature', label: 'Temperatura (°C)', icon: Thermometer },
-    { value: 'disk_free', label: 'Espaço Livre em Disco (%)', icon: HardDrive },
-    { value: 'latency', label: 'Latência (ms)', icon: Monitor },
+    { value: 'cpu_usage', label: 'CPU Usage (%)', icon: Cpu },
+    { value: 'ram_usage', label: 'Memory Usage (%)', icon: HardDrive },
+    { value: 'temperature', label: 'Temperature (°C)', icon: Thermometer },
+    { value: 'disk_free', label: 'Free Disk Space (%)', icon: HardDrive },
+    { value: 'latency', label: 'Latency (ms)', icon: Monitor },
   ];
 
   const operators = [
-    { value: '>', label: 'Maior que (>)' },
-    { value: '<', label: 'Menor que (<)' },
-    { value: '>=', label: 'Maior ou igual (>=)' },
-    { value: '<=', label: 'Menor ou igual (<=)' },
-    { value: '==', label: 'Igual (==)' },
+    { value: '>', label: 'Greater than (>)' },
+    { value: '<', label: 'Less than (<)' },
+    { value: '>=', label: 'Greater than or equal (>=)' },
+    { value: '<=', label: 'Less than or equal (<=)' },
+    { value: '==', label: 'Equal (==)' },
   ];
 
-  // Função para fazer requisições autenticadas
-  const authFetch = async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('token');
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers,
-    };
-
-    const response = await fetch(`${API_BASE_URL}${url}`, {
-      ...options,
-      headers,
-    });
-
-    if (response.status === 401) {
-      throw new Error('Sessão expirada. Faça login novamente.');
-    }
-
-    if (!response.ok) {
-      // Se for 204, não há corpo para json
-      let errorData: any = {};
-      if (response.status !== 204) {
-        errorData = await response.json().catch(() => ({}));
-      }
-      throw new Error((errorData && typeof errorData === 'object' && 'error' in errorData ? errorData.error : undefined) || `Erro ${response.status}: ${response.statusText}`);
-    }
-
-    // Se for 204, não retorna nada
-    if (response.status === 204) return null;
-    return response.json();
-  };
-
-  // Buscar regras do usuário
+  // Fetch user rules
   const fetchRules = async () => {
     try {
-      setLoading(true);
-      const data = await authFetch('/notifications/rules');
+      clearError();
+      const data = await authFetch<NotificationRule[]>(`${API_BASE_URL}/notifications/rules`);
       setRules(data);
     } catch (error: any) {
-      console.error('Erro ao buscar regras:', error);
+      console.error('Error fetching rules:', error);
       toast({
-        title: "Erro",
-        description: error.message || "Não foi possível carregar as regras de notificação.",
+        title: "Error",
+        description: error.message || "Could not load notification rules.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Criar nova regra
+  // Create new rule
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.device_sn || !formData.metric || !formData.operator || !formData.value) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
+        title: "Required fields",
+        description: "Please fill in all fields.",
         variant: "destructive",
       });
       return;
     }
 
     try {
+      clearError();
       const newRule = {
         device_sn: formData.device_sn,
         condition: {
@@ -156,7 +134,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
         }
       };
 
-      await authFetch('/notifications/rules', {
+      await authFetch(`${API_BASE_URL}/notifications/rules`, {
         method: 'POST',
         body: JSON.stringify(newRule),
       });
@@ -165,23 +143,23 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
       setShowForm(false);
       
       toast({
-        title: "Regra criada!",
-        description: "Nova regra de notificação adicionada com sucesso.",
+        title: "Rule created!",
+        description: "New notification rule added successfully.",
       });
 
-      onRuleAdded(); // Notificar o componente pai
-      fetchRules(); // Recarregar a lista
+      onRuleAdded(); // Notify parent component
+      fetchRules(); // Reload the list
 
     } catch (error: any) {
       toast({
-        title: "Erro ao criar regra",
-        description: error.message || "Não foi possível criar a regra de notificação.",
+        title: "Error creating rule",
+        description: error.message || "Could not create notification rule.",
         variant: "destructive",
       });
     }
   };
 
-  // Iniciar edição de regra
+  // Start rule editing
   const startEditing = (rule: NotificationRule) => {
     setEditingId(rule.id);
     setEditFormData({
@@ -192,17 +170,18 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
     });
   };
 
-  // Cancelar edição
+  // Cancel editing
   const cancelEditing = () => {
     setEditingId(null);
     setEditFormData(null);
   };
 
-  // Salvar edição
+  // Save editing
   const saveEditing = async (ruleId: string) => {
     if (!editFormData) return;
     
     try {
+      clearError();
       const updatedRule = {
         device_sn: editFormData.device_sn,
         condition: {
@@ -212,7 +191,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
         }
       };
 
-      await authFetch(`/notifications/rules/${ruleId}`, {
+      await authFetch(`${API_BASE_URL}/notifications/rules/${ruleId}`, {
         method: 'PUT',
         body: JSON.stringify(updatedRule),
       });
@@ -221,45 +200,45 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
       setEditFormData(null);
       
       toast({
-        title: "Regra atualizada!",
-        description: "A regra de notificação foi atualizada com sucesso.",
+        title: "Rule updated!",
+        description: "Notification rule updated successfully.",
       });
 
-      onRuleUpdated(); // Notificar o componente pai
-      fetchRules(); // Recarregar a lista
+      onRuleUpdated(); // Notify parent component
+      fetchRules(); // Reload the list
 
     } catch (error: any) {
       toast({
-        title: "Erro ao atualizar regra",
-        description: error.message || "Não foi possível atualizar a regra de notificação.",
+        title: "Error updating rule",
+        description: error.message || "Could not update notification rule.",
         variant: "destructive",
       });
     }
   };
 
-  // Excluir regra
+  // Delete rule
   const handleDelete = async (ruleId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta regra?')) return;
+    if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
       setDeletingId(ruleId);
-      await authFetch(`/notifications/rules/${ruleId}`, {
+      clearError();
+      await authFetch(`${API_BASE_URL}/notifications/rules/${ruleId}`, {
         method: 'DELETE',
       });
 
-      // Atualiza a lista localmente para resposta mais rápida
+      // Update list locally for faster response
       setRules((prev) => prev.filter((r) => r.id !== ruleId));
 
       toast({
-        title: "Regra removida",
-        description: "A regra de notificação foi removida com sucesso.",
+        title: "Rule removed",
+        description: "Notification rule removed successfully.",
       });
 
-      onRuleDeleted(); // Notificar o componente pai
-      // fetchRules(); // Não precisa recarregar, já atualizou localmente
+      onRuleDeleted(); // Notify parent component
     } catch (error: any) {
       toast({
-        title: "Erro ao excluir regra",
-        description: error.message || "Não foi possível excluir a regra de notificação.",
+        title: "Error deleting rule",
+        description: error.message || "Could not delete notification rule.",
         variant: "destructive",
       });
     } finally {
@@ -284,23 +263,32 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    return new Date(dateString).toLocaleDateString('en-US');
   };
 
-  // Carregar regras ao inicializar
+  // Function to navigate to notifications page
+  const handleViewAllNotifications = () => {
+    navigate('/notifications');
+  };
+
+  // Load rules on initialization
   useEffect(() => {
     fetchRules();
   }, []);
 
-  if (loading) {
+  // Get only the first rules based on maxRulesToShow
+  const displayedRules = rules.slice(0, maxRulesToShow);
+  const hasMoreRules = rules.length > maxRulesToShow;
+
+  if (loading && rules.length === 0) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Regras de Notificação</h3>
+          <h3 className="text-lg font-semibold">Notification Rules</h3>
           <RefreshCw className="h-4 w-4 animate-spin" />
         </div>
         <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
+          {[...Array(Math.min(2, maxRulesToShow))].map((_, i) => (
             <div key={i} className="p-4 border border-border/50 rounded-lg bg-card/30 animate-pulse">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -322,7 +310,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Regras de Notificação</h3>
+        <h3 className="text-lg font-semibold">Notification Rules</h3>
         <Button 
           variant="outline" 
           size="sm" 
@@ -330,14 +318,14 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
           disabled={loading}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Atualizar
+          Refresh
         </Button>
       </div>
 
       {/* Existing Rules */}
-      {rules.length > 0 ? (
+      {displayedRules.length > 0 ? (
         <div className="space-y-3">
-          {rules.map((rule) => {
+          {displayedRules.map((rule) => {
             const Icon = getMetricIcon(rule.condition.metric);
             const isEditing = editingId === rule.id;
             
@@ -347,18 +335,18 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                 className="p-4 border border-border/50 rounded-lg bg-card/30 hover:bg-card/50 transition-colors"
               >
                 {isEditing ? (
-                  // Formulário de edição
+                  // Edit form
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label htmlFor="edit-device">Dispositivo</Label>
+                        <Label htmlFor="edit-device">Device</Label>
                         <Select 
                           value={editFormData?.device_sn || ''} 
                           onValueChange={(value) => setEditFormData({...editFormData!, device_sn: value})}
                           required
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione um dispositivo" />
+                            <SelectValue placeholder="Select a device" />
                           </SelectTrigger>
                           <SelectContent>
                             {devices.map((device) => (
@@ -371,14 +359,14 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="edit-metric">Métrica</Label>
+                        <Label htmlFor="edit-metric">Metric</Label>
                         <Select 
                           value={editFormData?.metric || ''} 
                           onValueChange={(value) => setEditFormData({...editFormData!, metric: value})}
                           required
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma métrica" />
+                            <SelectValue placeholder="Select a metric" />
                           </SelectTrigger>
                           <SelectContent>
                             {metrics.map((metric) => (
@@ -393,14 +381,14 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label htmlFor="edit-operator">Operador</Label>
+                        <Label htmlFor="edit-operator">Operator</Label>
                         <Select 
                           value={editFormData?.operator || ''} 
                           onValueChange={(value) => setEditFormData({...editFormData!, operator: value})}
                           required
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Selecione um operador" />
+                            <SelectValue placeholder="Select an operator" />
                           </SelectTrigger>
                           <SelectContent>
                             {operators.map((operator) => (
@@ -413,7 +401,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="edit-value">Valor</Label>
+                        <Label htmlFor="edit-value">Value</Label>
                         <Input
                           id="edit-value"
                           type="number"
@@ -434,7 +422,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                         disabled={!editFormData?.device_sn || !editFormData?.metric || !editFormData?.operator || !editFormData?.value}
                       >
                         <Save className="h-4 w-4 mr-2" />
-                        Salvar
+                        Save
                       </Button>
                       <Button 
                         variant="outline" 
@@ -442,12 +430,12 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                         onClick={cancelEditing}
                       >
                         <X className="h-4 w-4 mr-2" />
-                        Cancelar
+                        Cancel
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  // Visualização da regra
+                  // Rule view
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center">
@@ -462,7 +450,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                         </p>
                         {rule.created_at && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            Criada em: {formatDate(rule.created_at)}
+                            Created at: {formatDate(rule.created_at)}
                           </p>
                         )}
                       </div>
@@ -471,7 +459,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
                     <div className="flex items-center space-x-2">
                       <Badge variant="secondary" className="bg-warning/10 text-warning border-warning">
                         <AlertTriangle className="h-3 w-3 mr-1" />
-                        Ativo
+                        Active
                       </Badge>
                       <Button
                         variant="outline"
@@ -496,29 +484,43 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
               </div>
             );
           })}
+          
+          {/* Button to view all rules if there are more rules than displayed */}
+          {hasMoreRules && (
+            <div className="pt-2">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleViewAllNotifications}
+              >
+                <Bell className="h-4 w-4 mr-2" />
+                View all rules ({rules.length - displayedRules.length} more)
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-8">
           <AlertTriangle className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
-          <p className="text-muted-foreground text-sm">Nenhuma regra de notificação configurada</p>
+          <p className="text-muted-foreground text-sm">No notification rules configured</p>
         </div>
       )}
 
       {/* Add Rule Form */}
       {showForm ? (
         <form onSubmit={handleSubmit} className="p-4 border border-border/50 rounded-lg bg-card/30 space-y-4">
-          <h4 className="font-medium text-sm text-foreground">Nova Regra de Notificação</h4>
+          <h4 className="font-medium text-sm text-foreground">New Notification Rule</h4>
           
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="device">Dispositivo</Label>
+              <Label htmlFor="device">Device</Label>
               <Select 
                 value={formData.device_sn} 
                 onValueChange={(value) => setFormData({...formData, device_sn: value})}
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um dispositivo" />
+                  <SelectValue placeholder="Select a device" />
                 </SelectTrigger>
                 <SelectContent>
                   {devices.map((device) => (
@@ -531,14 +533,14 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="metric">Métrica</Label>
+              <Label htmlFor="metric">Metric</Label>
               <Select 
                 value={formData.metric} 
                 onValueChange={(value) => setFormData({...formData, metric: value})}
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma métrica" />
+                  <SelectValue placeholder="Select a metric" />
                 </SelectTrigger>
                 <SelectContent>
                   {metrics.map((metric) => (
@@ -553,14 +555,14 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="operator">Operador</Label>
+              <Label htmlFor="operator">Operator</Label>
               <Select 
                 value={formData.operator} 
                 onValueChange={(value) => setFormData({...formData, operator: value})}
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um operador" />
+                  <SelectValue placeholder="Select an operator" />
                 </SelectTrigger>
                 <SelectContent>
                   {operators.map((operator) => (
@@ -573,7 +575,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="value">Valor</Label>
+              <Label htmlFor="value">Value</Label>
               <Input
                 id="value"
                 type="number"
@@ -594,7 +596,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
               className="bg-gradient-primary hover:bg-primary/90 text-primary-foreground"
               disabled={loading}
             >
-              {loading ? "Criando..." : "Criar Regra"}
+              {loading ? "Creating..." : "Create Rule"}
             </Button>
             <Button 
               type="button" 
@@ -603,7 +605,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
               onClick={() => setShowForm(false)}
               disabled={loading}
             >
-              Cancelar
+              Cancel
             </Button>
           </div>
         </form>
@@ -615,7 +617,7 @@ export function NotificationRules({ devices, onRuleAdded, onRuleDeleted, onRuleU
           disabled={devices.length === 0}
         >
           <Plus className="h-4 w-4 mr-2" />
-          {devices.length === 0 ? "Adicione dispositivos primeiro" : "Adicionar Nova Regra"}
+          {devices.length === 0 ? "Add devices first" : "Add New Rule"}
         </Button>
       )}
     </div>
