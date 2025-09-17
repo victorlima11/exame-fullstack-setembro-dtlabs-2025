@@ -236,7 +236,6 @@ export default function NotificationsPage() {
   };
 
   const filterLogs = () => {
-    // Combine saved logs with real-time notifications
     const allNotifications = [...realTimeNotifications, ...notificationLogs];
     
     let filtered = allNotifications;
@@ -459,18 +458,6 @@ export default function NotificationsPage() {
                     className="pl-10"
                   />
                 </div>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    <SelectItem value="warning">Warnings</SelectItem>
-                    <SelectItem value="error">Errors</SelectItem>
-                    <SelectItem value="success">Success</SelectItem>
-                    <SelectItem value="info">Info</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               {filteredLogs.length === 0 ? (

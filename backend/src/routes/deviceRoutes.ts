@@ -1,4 +1,3 @@
-// routes/deviceRoutes.ts
 import { Router } from 'express';
 import {
   createDeviceController,

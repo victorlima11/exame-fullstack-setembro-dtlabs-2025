@@ -234,10 +234,15 @@ export default function DashboardPage() {
       </div>
 
       {showDeviceForm && (
-        <DeviceForm 
-          onClose={() => setShowDeviceForm(false)}
-          onDeviceAdded={handleDeviceAdded}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          <div className="relative bg-background border border-border rounded-xl shadow-xl w-full max-w-lg p-6 z-10">
+            <DeviceForm 
+              onClose={() => setShowDeviceForm(false)}
+              onDeviceAdded={handleDeviceAdded}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
