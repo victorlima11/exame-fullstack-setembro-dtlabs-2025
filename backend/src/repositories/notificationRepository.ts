@@ -3,7 +3,6 @@ import { NotificationRule, CreateNotificationRule, Notification } from '../types
 
 export class NotificationRepository {
   static async updateRule(ruleId: string, updates: Partial<CreateNotificationRule>): Promise<NotificationRule | null> {
-    // Só permite atualizar device_sn e condition
     const query = `
       UPDATE notification_rules
       SET device_sn = COALESCE($2, device_sn),

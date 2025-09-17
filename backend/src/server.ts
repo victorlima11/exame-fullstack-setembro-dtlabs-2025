@@ -11,6 +11,7 @@ import deviceRoutes from './routes/deviceRoutes';
 import notificationsRoutes from './routes/notificationRoutes';
 import openDeivceRoutes from './routes/openDeviceRoutes';
 import heartbeatRoutes from './routes/heartbeatRoutes';
+import { setupSwagger } from './config/swagger';
 import { initializeSocketIO } from './utils/socketIO';
 import './queues/heartbeatQueue';
 import './queues/heartbeatWorker';
@@ -18,6 +19,8 @@ import './queues/heartbeatWorker';
 
 const app = express();
 const server = http.createServer(app);
+
+setupSwagger(app);
 
 app.use(cors());
 app.use(morgan('dev'));

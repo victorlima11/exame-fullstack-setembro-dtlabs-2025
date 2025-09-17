@@ -31,6 +31,8 @@
     "pg": "^8.16.3",
     "redis": "^5.8.2",
     "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^11.1.0",
     "zod": "^4.0.14"
   },
@@ -42,6 +44,8 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.2.0",
     "@types/pg": "^8.15.5",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9.32.0",
     "jest": "^30.0.5",
     "prettier": "^3.6.2",
