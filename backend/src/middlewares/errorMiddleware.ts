@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from 'express';
+
 export class DeviceSNInvalid extends Error {
   constructor() {
     super('Serial Number must have exactly 12 numeric digits');
@@ -7,7 +9,7 @@ export class DeviceSNInvalid extends Error {
 
 export class DeviceSNAlreadyExists extends Error {
   constructor() {
-    super('Device with this Serial Number already exists');
+    super('Device with this Serial Number already exists for this user');
     this.name = 'DeviceSNAlreadyExists';
   }
 }

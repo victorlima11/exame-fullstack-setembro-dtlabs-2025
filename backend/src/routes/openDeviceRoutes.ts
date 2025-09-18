@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getAllDeviceSNsController } from '../controllers/openDeviceController';
+import { OpenDeviceController } from '../controllers/openDeviceController';
 
 const router = Router();
 
-router.get('/sns', getAllDeviceSNsController);
+router.get('/sns', OpenDeviceController.getAllDevicesSNs);
 
 export default router;

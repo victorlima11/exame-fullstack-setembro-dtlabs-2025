@@ -37,6 +37,7 @@ app.get('/healthcheck', (req, res) => {
   res.send('Server is alive!');
 });
 
+
 initializeSocketIO(server);
 
 export { app, server };

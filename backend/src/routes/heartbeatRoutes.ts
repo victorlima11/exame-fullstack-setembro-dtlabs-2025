@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createHeartbeat, getDeviceHeartbeats, getLatestDeviceHeartbeat } from '../controllers/heartbeatController';
+import { HeartbeatController } from '../controllers/heartbeatController';
 
 const router = Router();
 
@@ -61,7 +61,7 @@ const router = Router();
  *       500:
  *         description: Erro interno do servidor.
  */
-router.post('/', createHeartbeat);
+router.post('/', HeartbeatController.createHeartbeat);
 
 /**
  * @swagger
@@ -116,7 +116,7 @@ router.post('/', createHeartbeat);
  *       500:
  *         description: Erro interno do servidor.
  */
-router.get('/:device_sn', getDeviceHeartbeats);
+router.get('/:device_sn', HeartbeatController.getDeviceHeartbeats);
 
 /**
  * @swagger
@@ -143,6 +143,6 @@ router.get('/:device_sn', getDeviceHeartbeats);
  *       500:
  *         description: Erro interno do servidor.
  */
-router.get('/:device_sn/latest', getLatestDeviceHeartbeat);
+router.get('/:device_sn/latest', HeartbeatController.getLatestDeviceHeartbeat);
 
 export default router;

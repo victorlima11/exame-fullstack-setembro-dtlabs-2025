@@ -1,12 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/authMiddleware';
-import {
-  createNotificationRule,
-  getUserNotificationRules,
-  deleteNotificationRule,
-  getUserNotifications,
-  updateNotificationRule
-} from '../controllers/notificationController';
+import { NotificationController } from '../controllers/notificationController';
 
 const router = Router();
 
@@ -36,7 +30,7 @@ const router = Router();
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/rules', authMiddleware, createNotificationRule);
+router.post('/rules', authMiddleware, NotificationController.createNotificationRule);
 
 /**
  * @swagger
@@ -60,7 +54,7 @@ router.post('/rules', authMiddleware, createNotificationRule);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/rules', authMiddleware, getUserNotificationRules);
+router.get('/rules', authMiddleware, NotificationController.getUserNotificationRules);
 
 /**
  * @swagger
@@ -97,7 +91,7 @@ router.get('/rules', authMiddleware, getUserNotificationRules);
  *       500:
  *         description: Erro interno do servidor
  */
-router.put('/rules/:id', authMiddleware, updateNotificationRule);
+router.put('/rules/:id', authMiddleware, NotificationController.updateNotificationRule);
 
 /**
  * @swagger
@@ -122,7 +116,7 @@ router.put('/rules/:id', authMiddleware, updateNotificationRule);
  *       500:
  *         description: Erro interno do servidor
  */
-router.delete('/rules/:id', authMiddleware, deleteNotificationRule);
+router.delete('/rules/:id', authMiddleware, NotificationController.deleteNotificationRule);
 
 /**
  * @swagger
@@ -146,6 +140,6 @@ router.delete('/rules/:id', authMiddleware, deleteNotificationRule);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/', authMiddleware, getUserNotifications);
+router.get('/', authMiddleware, NotificationController.getUserNotifications);
 
 export default router;

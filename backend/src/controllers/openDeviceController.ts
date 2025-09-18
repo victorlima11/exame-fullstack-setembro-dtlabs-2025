@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
-import { getAllDeviceSNs } from '../services/openDeviceService';
+import { OpenDeviceService } from '../services/openDeviceService';
 
-export async function getAllDeviceSNsController(req: Request, res: Response) {
-  try {
-    const sns = await getAllDeviceSNs();
-    res.json(sns);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+export class OpenDeviceController {
+  static async getAllDevicesSNs(req: Request, res: Response) {
+    try {
+      const sns = await OpenDeviceService.getAllDeviceSNs();
+      res.json(sns);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
   }
 }
+

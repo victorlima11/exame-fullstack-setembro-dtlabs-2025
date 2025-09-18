@@ -39,15 +39,24 @@ export function useAuthFetch(): AuthFetchResult {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorBody: any = null;
+        try {
+          errorBody = await response.json();
+        } catch {
+        }
+        throw {
+          status: response.status,
+          statusText: response.statusText,
+          ...errorBody,
+        };
       }
 
       if (response.status === 204) return null;
 
       const text = await response.text();
       return text ? JSON.parse(text) : null;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error at fetching data';
+    } catch (err: any) {
+      const errorMessage = err?.error || (err instanceof Error ? err.message : "Error at fetching data");
       setError(errorMessage);
       throw err;
     } finally {

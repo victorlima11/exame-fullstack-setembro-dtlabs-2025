@@ -1,12 +1,5 @@
 import { Router } from 'express';
-import {
-  createDeviceController,
-  getDeviceController,
-  getUserDevicesController,
-  getAllDevicesController,
-  updateDeviceController,
-  deleteDeviceController
-} from '../controllers/deviceController';
+import { DeviceController } from '../controllers/deviceController';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import {
   validateDeviceCreate,
@@ -63,7 +56,7 @@ router.use(authMiddleware);
  *       401:
  *         description: Não autorizado
  */
-router.post('/', validateDeviceCreate, createDeviceController);
+router.post('/', validateDeviceCreate, DeviceController.createDeviceController);
 
 /**
  * @swagger
@@ -87,7 +80,7 @@ router.post('/', validateDeviceCreate, createDeviceController);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/user', getUserDevicesController);
+router.get('/user', DeviceController.getUserDevicesController);
 
 /**
  * @swagger
@@ -129,7 +122,7 @@ router.get('/user', getUserDevicesController);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/', validateDeviceFilters, getAllDevicesController);
+router.get('/', validateDeviceFilters, DeviceController.getAllDevicesController);
 
 /**
  * @swagger
@@ -163,7 +156,7 @@ router.get('/', validateDeviceFilters, getAllDevicesController);
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/:id', validateDeviceId, validateDeviceOwnership, getDeviceController);
+router.get('/:id', validateDeviceId, validateDeviceOwnership, DeviceController.getDeviceController);
 
 /**
  * @swagger
@@ -216,7 +209,7 @@ router.get('/:id', validateDeviceId, validateDeviceOwnership, getDeviceControlle
  *       404:
  *         description: Dispositivo não encontrado
  */
-router.put('/:id', validateDeviceId, validateDeviceUpdate, validateDeviceOwnership, updateDeviceController);
+router.put('/:id', validateDeviceId, validateDeviceUpdate, validateDeviceOwnership, DeviceController.updateDeviceController);
 
 /**
  * @swagger
@@ -246,6 +239,6 @@ router.put('/:id', validateDeviceId, validateDeviceUpdate, validateDeviceOwnersh
  *       500:
  *         description: Erro interno do servidor
  */
-router.delete('/:id', validateDeviceId, validateDeviceOwnership, deleteDeviceController);
+router.delete('/:id', validateDeviceId, validateDeviceOwnership, DeviceController.deleteDeviceController);
 
 export default router;

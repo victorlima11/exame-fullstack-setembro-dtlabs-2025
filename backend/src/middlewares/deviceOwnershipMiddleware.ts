@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { getDeviceById } from '../services/deviceService';
+import { DeviceService } from '../services/deviceService';
 
 export async function validateDeviceOwnership(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
     const userId = (req as any).user.id;
 
-    const device = await getDeviceById(id);
+    const device = await DeviceService.getDeviceById(id);
 
     if (!device) {
       return res.status(404).json({ error: 'Device not found.' });

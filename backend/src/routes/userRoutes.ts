@@ -1,13 +1,5 @@
 import express, { Router } from "express";
-import {
-  login,
-  register,
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
-  getMe,
-} from "../controllers/userController";
+import { UserController } from "../controllers/userController";
 import {
   validateUserLogin,
   validateUserRegister,
@@ -64,7 +56,7 @@ const router: Router = express.Router();
  *       500:
  *         description: Erro interno do servidor
  */
-router.post("/login", validateUserLogin, login);
+router.post("/login", validateUserLogin, UserController.login);
 
 /**
  * @swagger
@@ -110,7 +102,7 @@ router.post("/login", validateUserLogin, login);
  *       400:
  *         description: Requisição inválida ex usuário já existe
  */
-router.post("/register", validateUserRegister, register);
+router.post("/register", validateUserRegister, UserController.register);
 
 /**
  * @swagger
@@ -132,7 +124,7 @@ router.post("/register", validateUserRegister, register);
  *       404:
  *         description: Usuário não encontrado
  */
-router.get("/me", authMiddleware, getMe);
+router.get("/me", authMiddleware, UserController.getMe);
 
 /**
  * @swagger
@@ -154,7 +146,7 @@ router.get("/me", authMiddleware, getMe);
  *       401:
  *         description: Não autorizado
  */
-router.get("/", authMiddleware, getAllUsers);
+router.get("/", authMiddleware, UserController.getAllUsers);
 
 /**
  * @swagger
@@ -186,7 +178,7 @@ router.get("/", authMiddleware, getAllUsers);
  *       404:
  *         description: Usuário não encontrado
  */
-router.get("/:id", authMiddleware, getUserById);
+router.get("/:id", authMiddleware, UserController.getUserById);
 
 /**
  * @swagger
@@ -231,7 +223,7 @@ router.get("/:id", authMiddleware, getUserById);
  *       404:
  *         description: Usuário não encontrado
  */
-router.put("/:id", authMiddleware, updateUser);
+router.put("/:id", authMiddleware, UserController.updateUser);
 
 /**
  * @swagger
@@ -257,6 +249,6 @@ router.put("/:id", authMiddleware, updateUser);
  *       401:
  *         description: Não autorizado
  */
-router.delete("/:id", authMiddleware, deleteUser);
+router.delete("/:id", authMiddleware, UserController.deleteUser);
 
 export default router;

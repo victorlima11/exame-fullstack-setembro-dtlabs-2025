@@ -1,46 +1,49 @@
-import { hash } from 'crypto';
 import { UserRepository } from '../repositories/userRepository';
 import { NewUser } from '../types/userTypes';
 import { hashPassword } from '../utils/hash';
 import { UserAlreadyExists } from '../middlewares/errorMiddleware';
 
-export async function createUser(user: NewUser) {
-    const exists = await UserRepository.findUserByEmail(user.email);
-    if (exists) {
-        throw new UserAlreadyExists();
+export class UserService {
+
+    static async createUser(user: NewUser) {
+        const exists = await UserRepository.findUserByEmail(user.email);
+        if (exists) {
+            throw new UserAlreadyExists();
+        }
+
+        const hashedPassword = await hashPassword(user.password);
+
+        return await UserRepository.createUser({
+            ...user,
+            password: hashedPassword,
+        });
     }
 
-    const hashedPassword = await hashPassword(user.password);
-
-    return await UserRepository.createUser({
-        ...user,
-        password: hashedPassword,
-    });
-}
-
-export async function getAllUsers() {
-    return UserRepository.findAllUsers();
-}
-
-export async function getUserById(id: string) {
-    return UserRepository.findUserById(id);
-}
-
-export async function getUserByEmail(email: string) {
-    return UserRepository.findUserByEmail(email);
-}
-
-export async function updateUser(id: string, user: Partial<NewUser>) {
-    if (user.password) {
-        user.password = await hashPassword(user.password);
+    static async getAllUsers() {
+        return UserRepository.findAllUsers();
     }
-    return UserRepository.updateUser(id, user);
-}
 
-export async function deleteUserByEmail(email: string) {
-    return UserRepository.deleteUserByEmail(email);
-}
+    static async getUserById(id: string) {
+        return UserRepository.findUserById(id);
+    }
 
-export async function deleteUserById(id: string) {
-    return UserRepository.deleteUser(id);
+    static async getUserByEmail(email: string) {
+        return UserRepository.findUserByEmail(email);
+    }
+
+    static async updateUser(id: string, user: Partial<NewUser>) {
+        if (user.password) {
+            user.password = await hashPassword(user.password);
+        }
+        return UserRepository.updateUser(id, user);
+    }
+
+    static async deleteUserByEmail(email: string) {
+        return UserRepository.deleteUserByEmail(email);
+    }
+
+    static async deleteUserById(id: string) {
+        return UserRepository.deleteUser(id);
+    }
+
 }

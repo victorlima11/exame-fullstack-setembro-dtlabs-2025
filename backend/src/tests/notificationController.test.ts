@@ -7,13 +7,7 @@ jest.mock('../config/db', () => ({
 
 import { Request, Response } from 'express';
 import { NotificationService } from '../services/notificationService';
-import {
-  updateNotificationRule,
-  getUserNotifications,
-  createNotificationRule,
-  getUserNotificationRules,
-  deleteNotificationRule
-} from '../controllers/notificationController';
+import { NotificationController } from '../controllers/notificationController';
 
 jest.mock('../services/notificationService', () => ({
   NotificationService: {
@@ -52,7 +46,7 @@ describe('NotificationController', () => {
       req.body = { name: 'Updated Rule' };
       (NotificationService.updateRule as jest.Mock).mockResolvedValue({ id: 'rule-1', name: 'Updated Rule' });
 
-      await updateNotificationRule(req as AuthRequest, res as Response);
+      await NotificationController.updateNotificationRule(req as AuthRequest, res as Response);
 
       expect(jsonMock).toHaveBeenCalledWith({ id: 'rule-1', name: 'Updated Rule' });
     });
@@ -62,7 +56,7 @@ describe('NotificationController', () => {
       req.body = { name: 'Updated Rule' };
       (NotificationService.updateRule as jest.Mock).mockResolvedValue(null);
 
-      await updateNotificationRule(req as AuthRequest, res as Response);
+      await NotificationController.updateNotificationRule(req as AuthRequest, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith({ error: 'Rule not found' });
@@ -74,7 +68,7 @@ describe('NotificationController', () => {
       req.user = { id: 'user-1' };
       (NotificationService.getUserNotifications as jest.Mock).mockResolvedValue([{ id: 'n1', message: 'Test' }]);
 
-      await getUserNotifications(req as AuthRequest, res as Response);
+      await NotificationController.getUserNotifications(req as AuthRequest, res as Response);
 
       expect(jsonMock).toHaveBeenCalledWith([{ id: 'n1', message: 'Test' }]);
     });
@@ -86,7 +80,7 @@ describe('NotificationController', () => {
       req.body = { name: 'New Rule' };
       (NotificationService.createRule as jest.Mock).mockResolvedValue({ id: 'rule-1', name: 'New Rule' });
 
-      await createNotificationRule(req as AuthRequest, res as Response);
+      await NotificationController.createNotificationRule(req as AuthRequest, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(201);
       expect(jsonMock).toHaveBeenCalledWith({ id: 'rule-1', name: 'New Rule' });
@@ -98,7 +92,7 @@ describe('NotificationController', () => {
       req.user = { id: 'user-1' };
       (NotificationService.getUserRules as jest.Mock).mockResolvedValue([{ id: 'rule-1', name: 'Rule 1' }]);
 
-      await getUserNotificationRules(req as AuthRequest, res as Response);
+      await NotificationController.getUserNotificationRules(req as AuthRequest, res as Response);
 
       expect(jsonMock).toHaveBeenCalledWith([{ id: 'rule-1', name: 'Rule 1' }]);
     });
@@ -109,7 +103,7 @@ describe('NotificationController', () => {
       req.params = { id: 'rule-1' };
       (NotificationService.deleteRule as jest.Mock).mockResolvedValue(true);
 
-      await deleteNotificationRule(req as AuthRequest, res as Response);
+      await NotificationController.deleteNotificationRule(req as AuthRequest, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(204);
       expect(sendMock).toHaveBeenCalledWith();
