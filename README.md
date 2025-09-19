@@ -7,12 +7,12 @@ Váriaveis de ambiente estão propositalmente expostas apenas para facilitar tes
 ![IMAGE](assets/screenshot_dashboard.png)
 
 # Índice
-#### Instalação
-#### Features
-#### Back-end
-#### Front-end
-#### Telemetria Simulada
-#### Testes
+- [Instalação](#instalação)
+- [Features](#features)
+- [Back-end](#back-end)
+- [Front-end](#front-end)
+- [Telemetria Simulada](telemetria-simulada)
+- [Testes](#testes)
 
 # Instalação 
 O sistema roda utilizando docker, então na raiz do projeto precisa apenas utilizar o docker-compose:
