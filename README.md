@@ -64,7 +64,7 @@ python app.py
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 
-Foi utilizado padrão de projeto MVC + POO como estrutura para o backend
+Foi utilizado padrão de projeto MVC + POO como estrutura para o backend.
 
 ```
 backend/
@@ -124,7 +124,7 @@ frontend/
 
 O arquivo `app.py` é um script feito para simular telemetria para todos os devices. Ele afeta automaticamente todos os devices de todos os usuários, mandando informações aleatórias a cada um minuto.
 Ele utiliza uma rota propositalmente pública apenas para simular de forma fácil e rápida qualquer dispositivo.
-Sempre efetuará requisições do tipo *POST* passando como *BODY* heartbeats aleatórios
+Sempre efetuará requisições do tipo *POST* passando como *BODY* heartbeats aleatórios.
 
 
 # Testes
@@ -142,6 +142,6 @@ npm test
 ### Testes manuais de notificações em tempo real
 Para poder testar notificações é preciso criar um usuário, você pode fazer isso na tela de sign up.
 Para facilitar, não há verificação de email então você pode usar credenciais como `admin@123` e `password123`.
-Então crie um dispositivo na aba de devices -> Crie uma regra para disparar notificações `ex: CPU_usage > 30` -> Espere o simulador enviar dados que disparem essas notificações
-Você pode visualizar as notificações no */dashboard* ou em */notifications* -> Mostra logs de notificações que já estão no banco de dados + as que estão no websocket
+Então crie um dispositivo na aba de devices -> Crie uma regra para disparar notificações `ex: CPU_usage > 30` -> Espere o simulador enviar dados que disparem essas notificações.
+Você pode visualizar as notificações no */dashboard* ou em */notifications* -> Mostra logs de notificações que já estão no banco de dados e as que estão no websocket.
 
