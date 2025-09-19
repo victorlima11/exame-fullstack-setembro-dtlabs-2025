@@ -4,6 +4,8 @@ DeviceWatch é uma plataforma completa para monitoramento em tempo real de dispo
 
 Váriaveis de ambiente estão propositalmente expostas apenas para facilitar testes!
 
+![IMAGE](assets/screenshot_dashboard.png)
+
 # Índice
 #### Instalação
 #### Features
@@ -79,7 +81,8 @@ python app.py
 [![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge\&logo=swagger\&logoColor=white)](https://swagger.io/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
-[![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
 
 Foi utilizado padrão de projeto MVC + POO como estrutura para o backend.
 
