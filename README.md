@@ -11,7 +11,7 @@ Váriaveis de ambiente estão propositalmente expostas apenas para facilitar tes
 - [Features](#features)
 - [Back-end](#back-end)
 - [Front-end](#front-end)
-- [Telemetria Simulada](telemetria-simulada)
+- [Telemetria Simulada](#telemetria-simulada)
 - [Testes](#testes)
 
 # Instalação 
