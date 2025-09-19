@@ -23,6 +23,8 @@ import {
   ResponsiveContainer
 } from "recharts";
 
+import { API_URL_BASE } from "@/api/api";
+
 interface Heartbeat {
   id: number;
   device_sn: string;
@@ -217,13 +219,11 @@ export function DeviceDetails({ device, onClose }: DeviceDetailsProps) {
     const fetchHeartbeats = async () => {
       try {
         setIsLoading(true);
-        
-        // Format dates for API URL
         const startParam = formatDateForAPI(dateRange.start);
         const endParam = formatDateForAPI(dateRange.end);
         
         const response = await fetch(
-          `http://localhost:3000/api/v1/heartbeats/${device.sn}?start=${startParam}&end=${endParam}&limit=1000`
+          `${API_URL_BASE}/heartbeats/${device.sn}?start=${startParam}&end=${endParam}&limit=1000`
         );
         
         const data = await response.json();

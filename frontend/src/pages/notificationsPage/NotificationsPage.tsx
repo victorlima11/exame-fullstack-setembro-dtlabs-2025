@@ -9,6 +9,7 @@ import { NotificationHeader } from "@/components/notifications/NotificationHeade
 import { NotificationLogList } from "@/components/notifications/NotificationLogList";
 import { NotificationRuleList } from "@/components/notifications/NotificationRuleList";
 import { NotificationRuleForm } from "@/components/notifications/NotificationRuleForm";
+import { API_URL_BASE, SOCKET_URL } from "@/api/api";
 
 export interface NotificationLog {
   id: string;
@@ -108,7 +109,7 @@ export default function NotificationsPage() {
   
   const fetchNotificationLogs = useCallback(async () => {
     try {
-      const logs = await authFetch('http://localhost:3000/api/v1/notifications');
+      const logs = await authFetch(`${API_URL_BASE}/notifications`);
       setNotificationLogs(logs);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -118,7 +119,7 @@ export default function NotificationsPage() {
 
   const fetchRules = useCallback(async () => {
     try {
-      const rulesData = await authFetch('http://localhost:3000/api/v1/notifications/rules');
+      const rulesData = await authFetch(`${API_URL_BASE}/notifications/rules`);
       setRules(rulesData);
     } catch (error) {
       console.error('Error fetching rules:', error);
@@ -128,7 +129,7 @@ export default function NotificationsPage() {
 
   const fetchDevices = useCallback(async () => {
     try {
-      const devicesData = await authFetch('http://localhost:3000/api/v1/devices/user');
+      const devicesData = await authFetch(`${API_URL_BASE}/devices/user`);
       setDevices(devicesData);
     } catch (error) {
       console.error('Error fetching devices:', error);
@@ -162,7 +163,7 @@ export default function NotificationsPage() {
     
     if (!userId) return;
 
-    const socket = io('http://localhost:3000', {
+    const socket = io(`${SOCKET_URL}`, {
       transports: ['websocket'],
       auth: { token },
     });
@@ -217,10 +218,10 @@ export default function NotificationsPage() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(log =>
-        log.message.toLowerCase().includes(term) ||
+        log.message?.toLowerCase().includes(term) ||
         log.device_name?.toLowerCase().includes(term) ||
-        log.device_sn.toLowerCase().includes(term) ||
-        log.title.toLowerCase().includes(term)
+        log.device_sn?.toLowerCase().includes(term) ||
+        log.title?.toLowerCase().includes(term)
       );
     }
 
@@ -245,7 +246,7 @@ export default function NotificationsPage() {
         is_active: formData.is_active
       };
 
-      await authFetch('http://localhost:3000/api/v1/notifications/rules', {
+      await authFetch(`${API_URL_BASE}/notifications/rules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRule),
@@ -286,7 +287,7 @@ export default function NotificationsPage() {
         is_active: editFormData.is_active
       };
 
-      await authFetch(`http://localhost:3000/api/v1/notifications/rules/${ruleId}`, {
+      await authFetch(`${API_URL_BASE}/notifications/rules/${ruleId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedRule),
@@ -305,7 +306,7 @@ export default function NotificationsPage() {
   const deleteRule = async (ruleId: string) => {
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
-      await authFetch(`http://localhost:3000/api/v1/notifications/rules/${ruleId}`, { method: 'DELETE' });
+      await authFetch(`${API_URL_BASE}/notifications/rules/${ruleId}`, { method: 'DELETE' });
       setRules(prev => prev.filter(rule => rule.id !== ruleId));
       toast({ title: "Rule removed", description: "Notification rule removed successfully." });
     } catch (error) {

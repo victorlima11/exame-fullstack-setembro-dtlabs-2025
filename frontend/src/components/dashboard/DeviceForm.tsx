@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Monitor, Loader2, MapPin, Hash, FileText } from "lucide-react";
+import { API_URL_BASE } from "@/api/api";
 
 interface DeviceFormProps {
   onClose: () => void;
@@ -58,7 +59,7 @@ export function DeviceForm({ onClose, onDeviceAdded }: DeviceFormProps) {
       if (description.trim()) {
         body.description = description.trim();
       }
-      const response = await fetch('http://localhost:3000/api/v1/devices', {
+      const response = await fetch(`${API_URL_BASE}/devices`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

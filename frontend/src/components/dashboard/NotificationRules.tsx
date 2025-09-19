@@ -21,6 +21,7 @@ import {
   Bell
 } from "lucide-react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { API_URL_BASE } from "@/api/api";
 
 interface NotificationRule {
   id: string;
@@ -76,7 +77,7 @@ export function NotificationRules({
   const { toast } = useToast();
   const navigate = useNavigate();
   const { authFetch, loading, error, clearError } = useAuthFetch();
-  const API_BASE_URL = 'http://localhost:3000/api/v1';
+  const API_BASE_URL = API_URL_BASE || 'http://localhost:3000/api/v1';
 
   const metrics = [
     { value: 'cpu_usage', label: 'CPU Usage (%)', icon: Cpu },
@@ -94,7 +95,6 @@ export function NotificationRules({
     { value: '==', label: 'Equal (==)' },
   ];
 
-  // Fetch user rules
   const fetchRules = async () => {
     try {
       clearError();
@@ -110,7 +110,6 @@ export function NotificationRules({
     }
   };
 
-  // Create new rule
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -147,8 +146,8 @@ export function NotificationRules({
         description: "New notification rule added successfully.",
       });
 
-      onRuleAdded(); // Notify parent component
-      fetchRules(); // Reload the list
+      onRuleAdded();
+      fetchRules();
 
     } catch (error: any) {
       toast({
@@ -159,7 +158,6 @@ export function NotificationRules({
     }
   };
 
-  // Start rule editing
   const startEditing = (rule: NotificationRule) => {
     setEditingId(rule.id);
     setEditFormData({
@@ -170,13 +168,11 @@ export function NotificationRules({
     });
   };
 
-  // Cancel editing
   const cancelEditing = () => {
     setEditingId(null);
     setEditFormData(null);
   };
 
-  // Save editing
   const saveEditing = async (ruleId: string) => {
     if (!editFormData) return;
     
@@ -204,8 +200,8 @@ export function NotificationRules({
         description: "Notification rule updated successfully.",
       });
 
-      onRuleUpdated(); // Notify parent component
-      fetchRules(); // Reload the list
+      onRuleUpdated();
+      fetchRules();
 
     } catch (error: any) {
       toast({
@@ -216,7 +212,6 @@ export function NotificationRules({
     }
   };
 
-  // Delete rule
   const handleDelete = async (ruleId: string) => {
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
@@ -226,7 +221,6 @@ export function NotificationRules({
         method: 'DELETE',
       });
 
-      // Update list locally for faster response
       setRules((prev) => prev.filter((r) => r.id !== ruleId));
 
       toast({
@@ -234,7 +228,7 @@ export function NotificationRules({
         description: "Notification rule removed successfully.",
       });
 
-      onRuleDeleted(); // Notify parent component
+      onRuleDeleted();
     } catch (error: any) {
       toast({
         title: "Error deleting rule",
@@ -266,17 +260,14 @@ export function NotificationRules({
     return new Date(dateString).toLocaleDateString('en-US');
   };
 
-  // Function to navigate to notifications page
   const handleViewAllNotifications = () => {
     navigate('/notifications');
   };
 
-  // Load rules on initialization
   useEffect(() => {
     fetchRules();
   }, []);
 
-  // Get only the first rules based on maxRulesToShow
   const displayedRules = rules.slice(0, maxRulesToShow);
   const hasMoreRules = rules.length > maxRulesToShow;
 
@@ -322,7 +313,6 @@ export function NotificationRules({
         </Button>
       </div>
 
-      {/* Existing Rules */}
       {displayedRules.length > 0 ? (
         <div className="space-y-3">
           {displayedRules.map((rule) => {
@@ -435,7 +425,6 @@ export function NotificationRules({
                     </div>
                   </div>
                 ) : (
-                  // Rule view
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-warning/10 rounded-lg flex items-center justify-center">
@@ -485,7 +474,6 @@ export function NotificationRules({
             );
           })}
           
-          {/* Button to view all rules if there are more rules than displayed */}
           {hasMoreRules && (
             <div className="pt-2">
               <Button 
@@ -506,7 +494,6 @@ export function NotificationRules({
         </div>
       )}
 
-      {/* Add Rule Form */}
       {showForm ? (
         <form onSubmit={handleSubmit} className="p-4 border border-border/50 rounded-lg bg-card/30 space-y-4">
           <h4 className="font-medium text-sm text-foreground">New Notification Rule</h4>

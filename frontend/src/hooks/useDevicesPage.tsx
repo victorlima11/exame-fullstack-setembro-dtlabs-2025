@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { useToast } from "@/hooks/use-toast";
 import { Device, Heartbeat } from "@/types/device";
+import { API_URL_BASE } from "@/api/api";
 
 export const useDevicesPage = () => {
   const { authFetch } = useAuthFetch();
@@ -20,7 +21,7 @@ export const useDevicesPage = () => {
     setLoading(true);
     setRefreshing(true);
     try {
-      const data = await authFetch('http://localhost:3000/api/v1/devices/user');
+      const data = await authFetch(`${API_URL_BASE}/devices/user`);
       const devicesWithStatus = await Promise.all(
         data.map(async (device: any) => {
           let status: Device['status'] = 'offline';
@@ -28,7 +29,7 @@ export const useDevicesPage = () => {
           let lastHeartbeat: Heartbeat | undefined;
 
           try {
-            const lastHb = await authFetch(`http://localhost:3000/api/v1/heartbeats/${device.sn}/latest`, {
+            const lastHb = await authFetch(`${API_URL_BASE}/heartbeats/${device.sn}/latest`, {
               cache: 'no-cache'
             });
 
@@ -100,8 +101,8 @@ export const useDevicesPage = () => {
   const handleSaveDevice = async (formData: any) => {
     const isEditing = !!editingDevice;
     const url = isEditing
-      ? `http://localhost:3000/api/v1/devices/${editingDevice!.id}`
-      : 'http://localhost:3000/api/v1/devices';
+      ? `${API_URL_BASE}/devices/${editingDevice!.id}`
+      : `${API_URL_BASE}/devices`;
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
@@ -133,7 +134,7 @@ export const useDevicesPage = () => {
     if (!window.confirm('Are you sure you want to delete this device?')) return;
 
     try {
-      await authFetch(`http://localhost:3000/api/v1/devices/${id}`, { method: 'DELETE' });
+      await authFetch(`${API_URL_BASE}/devices/${id}`, { method: 'DELETE' });
       toast({
         title: "Success",
         description: "Device deleted successfully",

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: ".env.TEMPLATE" });
 
 const SECRET = process.env.JWT_SECRET || 'key_for_test';
 if (!SECRET) {

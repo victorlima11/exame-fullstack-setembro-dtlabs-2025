@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { API_URL_BASE } from '@/api/api';
 
 interface User {
   id: string;
@@ -25,7 +26,7 @@ export const useAuth = () => {
   return context;
 };
 
-const API_BASE = 'http://localhost:3000/api/v1';
+const API_BASE = API_URL_BASE || 'http://localhost:3000/api/v1';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

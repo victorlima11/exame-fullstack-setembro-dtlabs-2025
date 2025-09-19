@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { useToast } from "@/hooks/use-toast";
 import { io, Socket } from "socket.io-client";
+import { API_URL_BASE, SOCKET_URL } from "@/api/api";
 
-// It would be better to have these in a central types file.
 interface NotificationLog {
   id: string;
   type: 'warning' | 'error' | 'info' | 'success';
@@ -65,7 +65,7 @@ export function useNotificationsPage() {
 
   const fetchNotificationLogs = useCallback(async () => {
     try {
-      const logs = await authFetch('http://localhost:3000/api/v1/notifications');
+      const logs = await authFetch(`${API_URL_BASE}/notifications`);
       setNotificationLogs(logs);
     } catch (error) {
       console.error('Error fetching logs:', error);
@@ -75,7 +75,7 @@ export function useNotificationsPage() {
 
   const fetchRules = useCallback(async () => {
     try {
-      const rulesData = await authFetch('http://localhost:3000/api/v1/notifications/rules');
+      const rulesData = await authFetch(`${API_URL_BASE}/notifications/rules`);
       setRules(rulesData);
     } catch (error) {
       console.error('Error fetching rules:', error);
@@ -85,7 +85,7 @@ export function useNotificationsPage() {
 
   const fetchDevices = useCallback(async () => {
     try {
-      const devicesData = await authFetch('http://localhost:3000/api/v1/devices/user');
+      const devicesData = await authFetch(`${API_URL_BASE}/devices/user`);
       setDevices(devicesData);
     } catch (error) {
       console.error('Error fetching devices:', error);
@@ -119,7 +119,7 @@ export function useNotificationsPage() {
     
     if (!userId) return;
 
-    const socket = io('http://localhost:3000', {
+    const socket = io(`${SOCKET_URL}`, {
       transports: ['websocket'],
       auth: { token },
     });
@@ -169,8 +169,8 @@ export function useNotificationsPage() {
   const handleSaveRule = useCallback(async (formData: any, editingRule: NotificationRule | null) => {
     const isEditing = !!editingRule;
     const url = isEditing
-      ? `http://localhost:3000/api/v1/notifications/rules/${editingRule!.id}`
-      : 'http://localhost:3000/api/v1/notifications/rules';
+      ? `${API_URL_BASE}/notifications/rules/${editingRule!.id}`
+      : `${API_URL_BASE}/notifications/rules`;
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
@@ -197,7 +197,7 @@ export function useNotificationsPage() {
   const handleDeleteRule = useCallback(async (ruleId: string) => {
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
-      await authFetch(`http://localhost:3000/api/v1/notifications/rules/${ruleId}`, { method: 'DELETE' });
+      await authFetch(`${API_URL_BASE}/notifications/rules/${ruleId}`, { method: 'DELETE' });
       setRules(prev => prev.filter(rule => rule.id !== ruleId));
       toast({ title: "Rule removed", description: "Notification rule removed successfully." });
     } catch (error: any) {

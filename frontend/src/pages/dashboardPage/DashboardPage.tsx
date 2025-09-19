@@ -10,6 +10,7 @@ import { TelemetryOverview } from "../../components/dashboard/TelemetryOverview"
 import { Header } from "../../components/header/Header";
 import { Plus, Activity, Bell, RefreshCw, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_URL_BASE } from "@/api/api";
 
 interface Device {
   id: string;
@@ -43,14 +44,14 @@ export default function DashboardPage() {
   const fetchUserDevices = async () => {
     setLoading(true);
     try {
-      const data = await authFetch('http://localhost:3000/api/v1/devices/user');
+      const data = await authFetch(`${API_URL_BASE}/devices/user`);
       const devicesWithStatus = await Promise.all(
         data.map(async (device: any) => {
           let status: Device['status'] = 'offline';
           let lastSeen = device.updatedAt || new Date().toISOString();
 
           try {
-            const lastHb = await authFetch(`http://localhost:3000/api/v1/heartbeats/${device.sn}/latest`);
+            const lastHb = await authFetch(`${API_URL_BASE}/heartbeats/${device.sn}/latest`);
             if (lastHb) {
               lastSeen = lastHb.createdAt || lastHb.timestamp || lastSeen;
               const diff = Date.now() - new Date(lastSeen).getTime();
@@ -103,7 +104,7 @@ export default function DashboardPage() {
 
     const telemetryPromises = onlineDevices.map(async (device) => {
       try {
-        const heartbeat = await authFetch(`http://localhost:3000/api/v1/heartbeats/${device.sn}/latest`);
+        const heartbeat = await authFetch(`${API_URL_BASE}/heartbeats/${device.sn}/latest`);
         return {
           cpu: parseFloat(heartbeat.cpu_usage) || 0,
           memory: parseFloat(heartbeat.ram_usage) || 0,

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { API_URL_BASE } from "@/api/api";
 
 interface Device {
   id: string;
@@ -84,7 +85,7 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
     setDeletingId(deviceId);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/v1/devices/${deviceId}`, {
+      const response = await fetch(`${API_URL_BASE}/devices/${deviceId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,7 +108,7 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
     setEditLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/v1/devices/${editingDevice.id}`, {
+      const response = await fetch(`${API_URL_BASE}/devices/${editingDevice.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -254,9 +255,9 @@ export function DeviceList({ devices, onUpdate, loading }: DeviceListProps) {
                 <Input id="editDescription" value={editDescription} onChange={e => setEditDescription(e.target.value)} />
               </div>
               <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={() => setEditingDevice(null)} disabled={editLoading}>Cancelar</Button>
-                <Button type="submit" disabled={editLoading} className="bg-gradient-primary text-white">
-                  {editLoading ? 'Salvando...' : 'Salvar'}
+                <Button type="button" variant="outline" onClick={() => setEditingDevice(null)} disabled={editLoading}>Cancel</Button>
+                <Button type="submit" disabled={editLoading} className="bg-gradient-primary text-black">
+                  {editLoading ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </form>

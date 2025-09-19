@@ -23,6 +23,8 @@ interface Notification {
   read: boolean;
 }
 
+import { API_URL_BASE, SOCKET_URL } from "@/api/api";
+
 function getUserIdFromToken(token: string | null): string | null {
   if (!token) return null;
   try {
@@ -97,7 +99,7 @@ export function Notifications() {
     const userId = getUserIdFromToken(token);
     if (!userId) return;
 
-    const socket = io('http://localhost:3000', {
+    const socket = io(`${SOCKET_URL}`, {
       transports: ['websocket'],
       auth: { token },
     });
