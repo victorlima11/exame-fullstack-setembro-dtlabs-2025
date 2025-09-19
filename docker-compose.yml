@@ -1,0 +1,65 @@
+services:
+  api_dt:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_dt
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/dt_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    command: npm run dev
+
+  db:
+    image: postgres:15-alpine
+    container_name: dt_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dt_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
+  front_dt:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_dt
+    ports:
+      - '8080:80'
+    depends_on:
+      - api_dt
+
+  simulator:
+    build:
+      context: ./simulator
+      dockerfile: Dockerfile
+    container_name: simulator_dt
+    restart: always
+    depends_on:
+      - api_dt
+    environment:
+      - API_BASE=http://host.docker.internal:3000/api/v1
+    command: python app.py
+
+volumes:
+  pgdata:
+  redisdata:

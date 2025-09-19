@@ -22,10 +22,18 @@ export class DeviceRepository {
         return result.rows[0] || null;
     }
 
-    static async findDeviceBySN(sn: string): Promise<Device | null> {
+    static async findDevicesBySN(sn: string): Promise<Device[]> {
         const result = await db.query<Device>(`
       SELECT * FROM devices WHERE sn = $1;
     `, [sn]);
+
+        return result.rows;
+    }
+
+    static async findDeviceBySNAndUser(sn: string, userId: string): Promise<Device | null> {
+        const result = await db.query<Device>(`
+      SELECT * FROM devices WHERE sn = $1 AND user_id = $2;
+    `, [sn, userId]);
 
         return result.rows[0] || null;
     }
@@ -45,31 +53,38 @@ export class DeviceRepository {
 
         if (filters?.userId) {
             paramCount++;
-            query += ` AND user_id = $${paramCount}`;
+            query += ` AND user_id = ${paramCount}`;
             values.push(filters.userId);
         }
 
         if (filters?.name) {
             paramCount++;
-            query += ` AND name ILIKE $${paramCount}`;
+            query += ` AND name ILIKE ${paramCount}`;
             values.push(`%${filters.name}%`);
         }
 
         if (filters?.location) {
             paramCount++;
-            query += ` AND location ILIKE $${paramCount}`;
+            query += ` AND location ILIKE ${paramCount}`;
             values.push(`%${filters.location}%`);
         }
 
         if (filters?.sn) {
             paramCount++;
-            query += ` AND sn = $${paramCount}`;
+            query += ` AND sn = ${paramCount}`;
             values.push(filters.sn);
         }
 
         query += ' ORDER BY created_at DESC';
 
         const result = await db.query<Device>(query, values);
+        return result.rows;
+    }
+
+    static async findAllDeviceSNs(): Promise<{sn: string}[]> {
+        const result = await db.query<{sn: string}>(`
+            SELECT DISTINCT sn FROM devices ORDER BY sn;
+        `);
         return result.rows;
     }
 

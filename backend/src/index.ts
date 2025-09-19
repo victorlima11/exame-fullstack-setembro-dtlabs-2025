@@ -1,7 +1,11 @@
-import { app } from './server';
+import { server } from './server';
+import dotenv from 'dotenv';
 
-const PORT = process.env.PORT
+dotenv.config({ path: ".env.TEMPLATE" });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log('Heartbeat worker initialized');
 });
