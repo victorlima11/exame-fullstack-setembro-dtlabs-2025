@@ -8,7 +8,6 @@ API_BASE = "http://host.docker.internal:3000/api/v1"
 SNS_URL = f"{API_BASE}/opendevices/sns"
 HEARTBEAT_URL = f"{API_BASE}/heartbeats"
 
-
 def get_devices_with_retry(max_retries=10, delay=5):
     for attempt in range(max_retries):
         try:
@@ -22,7 +21,6 @@ def get_devices_with_retry(max_retries=10, delay=5):
             time.sleep(delay)
     return []
 
-
 def simulate_heartbeat(sn):
     return {
         "device_sn": sn,
@@ -35,21 +33,18 @@ def simulate_heartbeat(sn):
         "boot_time": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
-
 if __name__ == "__main__":
-    devices = get_devices_with_retry()
-    if not devices:
-        print("No devices found. Exiting.")
-        exit(1)
-
-    print(f"{len(devices)} devices loaded for simulation.")
-
     while True:
-        for sn in devices:
-            data = simulate_heartbeat(sn)
-            try:
-                res = requests.post(HEARTBEAT_URL, json=data, timeout=5)
-                print(f"Heartbeat sent for {sn}: {res.status_code}")
-            except Exception as e:
-                print(f"Error sending heartbeat for {sn}: {e}")
+        devices = get_devices_with_retry()
+        if not devices:
+            print("No devices found. Retrying...")
+        else:
+            print(f"{len(devices)} devices found. Sending heartbeats...")
+            for sn in devices:
+                data = simulate_heartbeat(sn)
+                try:
+                    res = requests.post(HEARTBEAT_URL, json=data, timeout=5)
+                    print(f"Heartbeat sent for {sn}: {res.status_code}")
+                except Exception as e:
+                    print(f"Error sending heartbeat for {sn}: {e}")
         time.sleep(60)

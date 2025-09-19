@@ -6,6 +6,7 @@ Váriaveis de ambiente estão propositalmente expostas apenas para facilitar tes
 
 # Índice
 #### Instalação
+#### Features
 #### Back-end
 #### Front-end
 #### Telemetria Simulada
@@ -16,6 +17,14 @@ O sistema roda utilizando docker, então na raiz do projeto precisa apenas utili
 ```bash
 docker-compose up --build
 ```
+⚠️ Em caso de lentidão para buildar a aplicação é sugerido instalar as dependencias (npm) **ANTES** de executar o docker-compose ⚠️
+
+```bash
+cd backend && npm install
+cd ..
+cd frontend && npm install
+```
+
 Também é possível rodar cada container separado a partir de uma imagem ex:
 ```bash
 cd simulator
@@ -51,14 +60,22 @@ cd simulator
 pip install -r requirements.txt
 python app.py
 ```
+# Features
+- Autenticação de Usuário com JWT
+- Criptografia de senhas
+- Gráficos interativos
+- CRUD de Dispositivos
+- CRUD de Regras de notificações
+- Notificações em tempo real
+- Logs de notificações
 
 # Back-end
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=node.js\&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge\&logo=typescript\&logoColor=white)](https://www.typescriptlang.org/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white)](https://socket.io/)
 [![Bullmq](https://img.shields.io/badge/Bullmq-007ACC?style=for-the-badge&logo=bullmq&logoColor=white)]([https://www.typescriptlang.org/](https://bullmq.io/))
 [![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge\&logo=express\&logoColor=white)](https://expressjs.com/)
 [![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge\&logo=jsonwebtokens\&logoColor=white)](https://jwt.io/)
-[![Bcrypt](https://img.shields.io/badge/Bcrypt-0F2D3C?style=for-the-badge)](https://www.npmjs.com/package/bcrypt)
 [![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge\&logo=swagger\&logoColor=white)](https://swagger.io/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
@@ -86,6 +103,10 @@ backend/
 ├─ Dockerfile
 └─ package.json
 ```
+
+Fluxograma dos `Hearbeats`
+
+![Imagem](assets/fluxograma1.png)
 
 # Front-end
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=node.js\&logoColor=white)](https://nodejs.org/)
@@ -118,13 +139,14 @@ frontend/
 ├─ Dockerfile
 └─ package.json
 ```
+Após o build do front-end, os arquivos da pasta `dist/` são servidos pelo **Nginx**, atuando como proxy reverso, redirecionando requisições do cliente para o servidor correto ou servindo diretamente os arquivos estáticos.
 
 # Telemetria Simulada
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 
 O arquivo `app.py` é um script feito para simular telemetria para todos os devices. Ele afeta automaticamente todos os devices de todos os usuários, mandando informações aleatórias a cada um minuto.
 Ele utiliza uma rota propositalmente pública apenas para simular de forma fácil e rápida qualquer dispositivo.
-Sempre efetuará requisições do tipo *POST* passando como *BODY* heartbeats aleatórios.
+Sempre efetuará requisições do tipo **POST** passando como **BODY** heartbeats aleatórios.
 
 
 # Testes
@@ -144,4 +166,9 @@ Para poder testar notificações é preciso criar um usuário, você pode fazer 
 Para facilitar, não há verificação de email então você pode usar credenciais como `admin@123` e `password123`.
 Então crie um dispositivo na aba de devices -> Crie uma regra para disparar notificações `ex: CPU_usage > 30` -> Espere o simulador enviar dados que disparem essas notificações.
 Você pode visualizar as notificações no */dashboard* ou em */notifications* -> Mostra logs de notificações que já estão no banco de dados e as que estão no websocket.
+
+### Testes em endpoints
+Você pode usar o swagger para testar as rotas da api.
+
+É possível acessá-lo a partir de `http://localhost:3000/api-docs`
 
