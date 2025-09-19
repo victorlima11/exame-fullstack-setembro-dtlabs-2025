@@ -19,7 +19,7 @@ O sistema roda utilizando docker, então na raiz do projeto precisa apenas utili
 ```bash
 docker-compose up --build
 ```
-⚠️ Em caso de lentidão para buildar a aplicação é sugerido instalar as dependencias (npm) **ANTES** de executar o docker-compose ⚠️
+⚠️ Em caso de lentidão para buildar a aplicação é sugerido instalar as dependências (npm) **ANTES** de executar o docker-compose ⚠️
 
 ```bash
 cd backend && npm install
