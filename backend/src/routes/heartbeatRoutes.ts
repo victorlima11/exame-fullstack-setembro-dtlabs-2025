@@ -49,8 +49,8 @@ const router = Router();
  *                 format: float
  *                 description: Latência de rede (em ms).
  *               connectivity:
- *                 type: boolean
- *                 description: Status da conectividade de rede.
+ *                 type: number
+ *                 description: Status da conectividade de rede (1 Online, 0 Offline).
  *               boot_time:
  *                 type: string
  *                 format: date-time
@@ -94,11 +94,6 @@ router.post('/', HeartbeatController.createHeartbeat);
  *           type: integer
  *           default: 1000
  *         description: Número máximo de registros a serem retornados.
- *       - in: query
- *         name: metric
- *         schema:
- *           type: string
- *         description: Métrica específica para retornar (não implementado no backend ainda).
  *     responses:
  *       200:
  *         description: Lista de heartbeats para o dispositivo.
