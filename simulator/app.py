@@ -13,11 +13,28 @@ HEARTBEAT_URL = f"{API_BASE}/heartbeats"
 
 def register_user(name, email, password):
     body = {"name": name, "email": email, "password": password}
-    res = requests.post(REGISTER_URL, json=body, timeout=5)
+    try:
+        res = requests.post(REGISTER_URL, json=body, timeout=5)
+        res.raise_for_status()
+        data = res.json()
+        print(f"User created: {data['user']}")
+        return data["token"]
+    except requests.exceptions.HTTPError as e:
+        if res.status_code == 400:
+            print("admin already created")
+            return login_user(email, password)
+        else:
+            raise
+
+def login_user(email, password):
+    LOGIN_URL = f"{API_BASE}/users/login"
+    body = {"email": email, "password": password}
+    res = requests.post(LOGIN_URL, json=body, timeout=5)
     res.raise_for_status()
     data = res.json()
-    print(f"User created: {data['user']}")
+    print(f"Login realizado para {email}")
     return data["token"]
+
 
 def create_device(token, name, location, sn, description):
     headers = {"Authorization": f"Bearer {token}"}
