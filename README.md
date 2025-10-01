@@ -19,7 +19,7 @@ O sistema roda utilizando docker, então na raiz do projeto precisa apenas utili
 ```bash
 docker-compose up --build
 ```
-⚠️ Em caso de lentidão para buildar a aplicação é sugerido instalar as dependencias (npm) **ANTES** de executar o docker-compose ⚠️
+⚠️ Em caso de lentidão para buildar a aplicação é sugerido instalar as dependências (npm) **ANTES** de executar o docker-compose ⚠️
 
 ```bash
 cd backend && npm install
@@ -107,7 +107,11 @@ backend/
 └─ package.json
 ```
 
-Fluxograma dos `Hearbeats`
+#### A documentação mais precisa sobre as rotas e suas funções estão disponíveis no **swagger**
+
+É possível acessá-lo a partir de: `http://localhost:3000/api-docs`
+
+#### Fluxograma dos `Heartbeats`
 
 ![Imagem](assets/fluxograma1.png)
 
@@ -147,10 +151,14 @@ Após o build do front-end, os arquivos da pasta `dist/` são servidos pelo **Ng
 # Telemetria Simulada
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 
-O arquivo `app.py` é um script feito para simular telemetria para todos os devices. Ele afeta automaticamente todos os devices de todos os usuários, mandando informações aleatórias a cada um minuto.
+O arquivo `app.py` (espera 30s para os serviços serem iniciados) é um script feito para simular telemetria para todos os devices. Ele afeta automaticamente todos os devices de todos os usuários, mandando informações aleatórias a cada um minuto.
 Ele utiliza uma rota propositalmente pública apenas para simular de forma fácil e rápida qualquer dispositivo.
 Sempre efetuará requisições do tipo **POST** passando como **BODY** heartbeats aleatórios.
 
+O script também é responsável por adicionar um usuário e devices para testes de notificações, cuja a crendencial é:
+
+- admin@admin  - *email*
+- admin123     - *password*
 
 # Testes
 
@@ -164,10 +172,9 @@ npm test
 ```
 *Isso realizará testes nos controllers da aplicação.*
 
-### Testes manuais de notificações em tempo real
-Para poder testar notificações é preciso criar um usuário, você pode fazer isso na tela de sign up.
-Para facilitar, não há verificação de email então você pode usar credenciais como `admin@123` e `password123`.
-Então crie um dispositivo na aba de devices -> Crie uma regra para disparar notificações `ex: CPU_usage > 30` -> Espere o simulador enviar dados que disparem essas notificações.
+### Testes de notificações em tempo real
+**Espere o script iniciar.** *30s*
+Faça login utilizando as credenciais fornecidas em [Telemetria Simulada](#telemetria-simulada)
 Você pode visualizar as notificações no */dashboard* ou em */notifications* -> Mostra logs de notificações que já estão no banco de dados e as que estão no websocket.
 
 ### Testes em endpoints
